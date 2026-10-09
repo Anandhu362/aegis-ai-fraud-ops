@@ -137,3 +137,4 @@ class Verdict(BaseModel):
     completed_at: int | None = Field(
         default=None, description="Pipeline completion timestamp (epoch ms)"
     )
+    event_count: int = Field(default=0, description="Total telemetry events generated")

@@ -29,8 +29,9 @@ class StaticIpIntelAdapter:
         if not ip_address:
             return IpReputation(unknown=True)
 
-        is_tor = ip_address in TOR_EXIT_NODES
-        is_vpn = ip_address in VPN_HOSTING_IPS
+        ip_str = str(ip_address)
+        is_tor = ip_str in TOR_EXIT_NODES
+        is_vpn = ip_str in VPN_HOSTING_IPS
 
         if is_tor:
             return IpReputation(
