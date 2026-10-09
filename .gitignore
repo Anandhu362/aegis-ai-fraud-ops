@@ -4,6 +4,9 @@
 *.pem
 *.key
 *.cert
+infra/keys/
+*service-account*.json
+*.sa.json
 
 # Python virtualenvs and caches
 .venv/

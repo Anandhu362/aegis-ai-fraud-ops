@@ -117,6 +117,11 @@ tasks:
       - npm --prefix frontend run build
       - firebase deploy --only hosting,firestore:rules,firestore:indexes
 
+  infra:bootstrap:
+    desc: "Initialize Google Cloud & Firebase ecosystem (APIs, Firestore Native, IAM roles, Service Accounts)"
+    cmds:
+      - powershell -ExecutionPolicy Bypass -File infra/scripts/bootstrap.ps1
+
   clean:
     desc: "Clean build artifacts, python pycache, and temporary files"
     cmds:

@@ -1,33 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Investigations collection and sub-collections (events, etc)
-    match /investigations/{tx_id} {
-      allow read: if request.auth != null;
-      allow write: if false; // All writes are server-side via backend engine
 
-      match /events/{seq} {
-        allow read: if request.auth != null;
+    function signedIn() { 
+      return request.auth != null; 
+    }
+    
+    function hasRole(roles) { 
+      return signedIn() && (
+        !('role' in request.auth.token) || 
+        request.auth.token.role in roles || 
+        request.auth.token.firebase.sign_in_provider == 'anonymous'
+      ); 
+    }
+
+    // Investigations + telemetry: read-only for analysts/viewers/anonymous demo users.
+    // All writes are strictly server-side (Admin SDK / service accounts).
+    match /investigations/{txId} {
+      allow read: if hasRole(['viewer', 'analyst', 'admin']);
+      allow write: if false;
+
+      match /events/{eventId} {
+        allow read: if hasRole(['viewer', 'analyst', 'admin']);
         allow write: if false;
       }
     }
 
-    // System metrics & eval reports (read-only for dashboard)
-    match /system/{metricDoc} {
-      allow read: if request.auth != null;
+    // Public KPI & Evaluation docs for SOC dashboard
+    match /system/{docId} {
+      allow read: if hasRole(['viewer', 'analyst', 'admin']) && docId in ['metrics', 'eval_latest'];
       allow write: if false;
     }
 
-    // Deny all direct client access to sensitive internal collections
-    match /user_profiles/{userId} {
+    // Server-only collections: user_profiles, accounts, intel, internal data.
+    // Deny all client read and write access unconditionally.
+    match /user_profiles/{document=**} {
       allow read, write: if false;
     }
 
-    match /accounts/{userId} {
+    match /accounts/{document=**} {
       allow read, write: if false;
     }
 
-    match /intel/{doc} {
+    match /intel/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
       allow read, write: if false;
     }
   }

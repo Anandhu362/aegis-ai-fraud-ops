@@ -16,6 +16,8 @@ class AegisBaseSettings(BaseSettings):
     aegis_env: str = "local"
     aegis_adapter_mode: str = "mock"  # mock | gcp
     aegis_log_level: str = "INFO"
+    gemini_api_key: str | None = None
+    google_maps_api_key: str | None = None
 
     @property
     def is_mock_mode(self) -> bool:
