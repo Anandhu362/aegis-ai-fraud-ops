@@ -26,7 +26,7 @@ param(
     [switch]$EnableMaps = $true
 )
 
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 
 Write-Host '==================================================================' -ForegroundColor Cyan
 Write-Host '       Aegis AI Fraud Ops - Google Cloud Ecosystem Bootstrap       ' -ForegroundColor Cyan
@@ -34,7 +34,8 @@ Write-Host '==================================================================' 
 
 # 1. Verify gcloud CLI
 if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
-    Write-Error 'Google Cloud SDK (gcloud) is not found in PATH. Please install Google Cloud SDK.'
+    Write-Host 'ERROR: Google Cloud SDK (gcloud) is not found in PATH.' -ForegroundColor Red
+    exit 1
 }
 
 # 2. Determine Project ID
@@ -52,7 +53,8 @@ if ([string]::IsNullOrWhiteSpace($ProjectId)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($ProjectId)) {
-    Write-Error 'GCP Project ID could not be determined. Pass -ProjectId [your-project-id].'
+    Write-Host 'ERROR: GCP Project ID could not be determined. Pass -ProjectId [your-project-id].' -ForegroundColor Red
+    exit 1
 }
 
 Write-Host "[*] Target GCP Project: $ProjectId" -ForegroundColor Green
@@ -84,15 +86,15 @@ if ($EnableMaps) {
 }
 
 foreach ($api in $RequiredApis) {
-    Write-Host "    Enabling $api..."
+    Write-Host "    Checking / Enabling $api..."
     gcloud services enable $api --project $ProjectId --quiet
 }
 Write-Host '    [OK] APIs successfully enabled.' -ForegroundColor Green
 
 # 4. Initialize Firestore Database in Native Mode
 Write-Host "`n--> [2/7] Initializing Firestore Native Database..." -ForegroundColor Yellow
-$ExistingDb = gcloud firestore databases list --project $ProjectId --format='value(name)' 2>$null
-if (-not $ExistingDb) {
+$ExistingDb = (gcloud firestore databases list --project $ProjectId --format='value(name)' 2>&1)
+if (-not ($ExistingDb -match 'databases/\(default\)')) {
     Write-Host "    Creating Firestore (default) database in Native mode ($FirestoreRegion)..."
     gcloud firestore databases create --location=$FirestoreRegion --type=firestore-native --project $ProjectId --quiet
     Write-Host '    [OK] Firestore database created.' -ForegroundColor Green
@@ -102,8 +104,8 @@ if (-not $ExistingDb) {
 
 # 5. Create Artifact Registry Docker Repository
 Write-Host "`n--> [3/7] Setting up Artifact Registry..." -ForegroundColor Yellow
-$ExistingRepo = gcloud artifacts repositories describe aegis --location=$Region --project $ProjectId --format='value(name)' 2>$null
-if (-not $ExistingRepo) {
+$ExistingRepos = (gcloud artifacts repositories list --location=$Region --project $ProjectId --format='value(name)' 2>&1)
+if (-not ($ExistingRepos -match 'repositories/aegis')) {
     Write-Host "    Creating Docker repository 'aegis' in $Region..."
     gcloud artifacts repositories create aegis --repository-format=docker --location=$Region --description='Aegis container images' --project $ProjectId --quiet
     Write-Host "    [OK] Artifact Registry repository 'aegis' created." -ForegroundColor Green
@@ -113,10 +115,10 @@ if (-not $ExistingRepo) {
 
 # 6. Create Pub/Sub Topics
 Write-Host "`n--> [4/7] Setting up Pub/Sub topics..." -ForegroundColor Yellow
+$ExistingTopics = (gcloud pubsub topics list --project $ProjectId --format='value(name)' 2>&1)
 $Topics = @('tx-ingest', 'tx-ingest-dlq')
 foreach ($top in $Topics) {
-    $topDesc = gcloud pubsub topics describe $top --project $ProjectId --format='value(name)' 2>$null
-    if (-not $topDesc) {
+    if (-not ($ExistingTopics -match "topics/$top")) {
         Write-Host "    Creating topic '$top'..."
         gcloud pubsub topics create $top --project $ProjectId --quiet
     } else {
@@ -127,11 +129,21 @@ Write-Host '    [OK] Pub/Sub topics configured.' -ForegroundColor Green
 
 # 7. Create BigQuery Dataset
 Write-Host "`n--> [5/7] Setting up BigQuery dataset 'fraud_telemetry'..." -ForegroundColor Yellow
-$DatasetTarget = "$($ProjectId):fraud_telemetry"
-$DatasetExists = bq show --project_id=$ProjectId fraud_telemetry 2>$null
-if (-not $DatasetExists) {
+$token = (gcloud auth print-access-token 2>$null).Trim()
+$bqHeaders = @{ 'Authorization' = "Bearer $token"; 'Content-Type' = 'application/json' }
+$checkUri = "https://bigquery.googleapis.com/bigquery/v2/projects/$ProjectId/datasets/fraud_telemetry"
+$exists = $false
+try {
+    $null = Invoke-RestMethod -Method GET -Uri $checkUri -Headers $bqHeaders -ErrorAction Stop
+    $exists = $true
+} catch {
+    $exists = $false
+}
+
+if (-not $exists) {
     Write-Host "    Creating dataset 'fraud_telemetry'..."
-    bq --location=US mk --dataset $DatasetTarget
+    $body = @{ 'datasetReference' = @{ 'datasetId' = 'fraud_telemetry'; 'projectId' = $ProjectId }; 'location' = 'US' } | ConvertTo-Json
+    $null = Invoke-RestMethod -Method POST -Uri "https://bigquery.googleapis.com/bigquery/v2/projects/$ProjectId/datasets" -Headers $bqHeaders -Body $body
     Write-Host '    [OK] BigQuery dataset created.' -ForegroundColor Green
 } else {
     Write-Host "    [OK] BigQuery dataset 'fraud_telemetry' already exists." -ForegroundColor Green
@@ -170,10 +182,11 @@ $ServiceAccounts = @{
     )
 }
 
+$ExistingSAs = (gcloud iam service-accounts list --project $ProjectId --format='value(email)' 2>&1)
+
 foreach ($sa in $ServiceAccounts.Keys) {
     $saEmail = "$sa@$ProjectId.iam.gserviceaccount.com"
-    $saExists = gcloud iam service-accounts describe $saEmail --project $ProjectId --format='value(email)' 2>$null
-    if (-not $saExists) {
+    if (-not ($ExistingSAs -match $saEmail)) {
         Write-Host "    Creating Service Account '$sa'..."
         gcloud iam service-accounts create $sa --display-name="Aegis $sa" --project $ProjectId --quiet
     } else {
@@ -194,8 +207,8 @@ Write-Host '    [OK] Service accounts and IAM roles bound.' -ForegroundColor Gre
 
 # 9. Secret Manager Secrets Initialization
 Write-Host "`n--> [7/7] Checking Secret Manager..." -ForegroundColor Yellow
-$ExistingSecret = gcloud secrets describe aegis-api-keys --project $ProjectId --format='value(name)' 2>$null
-if (-not $ExistingSecret) {
+$ExistingSecrets = (gcloud secrets list --project $ProjectId --format='value(name)' 2>&1)
+if (-not ($ExistingSecrets -match 'secrets/aegis-api-keys')) {
     Write-Host "    Creating secret 'aegis-api-keys'..."
     gcloud secrets create aegis-api-keys --replication-policy='automatic' --project $ProjectId --quiet
     $devSecretContent = '{"simulator-dev":"b89e3a9c7b949be4b3f81e6267885b19d454641e17d66d7e0026e63787fb9ff3"}'
