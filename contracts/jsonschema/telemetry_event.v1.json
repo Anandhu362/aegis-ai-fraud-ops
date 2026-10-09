@@ -1,0 +1,73 @@
+{
+  "$defs": {
+    "TelemetryAction": {
+      "description": "Action category emitted during investigation pipeline.",
+      "enum": [
+        "THOUGHT",
+        "TOOL_CALL",
+        "TOOL_RESULT",
+        "FINDING",
+        "VERDICT",
+        "ACTION",
+        "ERROR"
+      ],
+      "title": "TelemetryAction",
+      "type": "string"
+    }
+  },
+  "description": "An ordered telemetry milestone emitted during agent pipeline execution.",
+  "properties": {
+    "seq": {
+      "description": "Strict monotonically increasing sequence number (0, 1, 2...)",
+      "minimum": 0,
+      "title": "Seq",
+      "type": "integer"
+    },
+    "agent": {
+      "description": "Name of the agent emitting the event",
+      "title": "Agent",
+      "type": "string"
+    },
+    "action": {
+      "$ref": "#/$defs/TelemetryAction",
+      "description": "Type of event (THOUGHT, TOOL_CALL, TOOL_RESULT, etc.)"
+    },
+    "severity": {
+      "default": "INFO",
+      "description": "INFO, WARN, or CRITICAL",
+      "title": "Severity",
+      "type": "string"
+    },
+    "message": {
+      "description": "Human-readable terminal log line",
+      "title": "Message",
+      "type": "string"
+    },
+    "data": {
+      "additionalProperties": true,
+      "description": "Structured payload or tool arguments/result",
+      "title": "Data",
+      "type": "object"
+    },
+    "latency_ms": {
+      "default": 0,
+      "description": "Execution duration of this specific step in ms",
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "timestamp": {
+      "description": "Epoch timestamp in milliseconds",
+      "title": "Timestamp",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "seq",
+    "agent",
+    "action",
+    "message",
+    "timestamp"
+  ],
+  "title": "TelemetryEvent",
+  "type": "object"
+}

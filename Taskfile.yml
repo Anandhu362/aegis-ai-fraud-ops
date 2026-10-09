@@ -1,0 +1,123 @@
+# ==============================================================================
+# Aegis AI Fraud Ops - Cross-Platform Automation Taskfile
+# Uses Taskfile (go-task): https://taskfile.dev
+# Works on Windows (PowerShell), macOS, and Linux
+# ==============================================================================
+version: "3"
+
+dotenv: [".env", ".env.example"]
+
+vars:
+  ENV: '{{.ENV | default "local"}}'
+  PYTHON: "python"
+  UV: "uv"
+
+tasks:
+  setup:
+    desc: "Bootstrap entire workspace (Python uv workspace, npm frontend dependencies, git hooks)"
+    cmds:
+      - uv sync --all-packages
+      - npm --prefix frontend install
+      - uv run pre-commit install
+    silent: false
+
+  lint:
+    desc: "Run all linters and code formatting checks across Python and TypeScript"
+    cmds:
+      - uv run ruff check .
+      - uv run ruff format --check .
+      - npm --prefix frontend run lint
+
+  format:
+    desc: "Automatically format Python and TypeScript source code"
+    cmds:
+      - uv run ruff format .
+      - uv run ruff check --fix .
+      - npm --prefix frontend run format
+
+  typecheck:
+    desc: "Strict type checking with mypy and tsc"
+    cmds:
+      - uv run mypy --strict packages/ services/ simulation/
+      - npm --prefix frontend run typecheck
+
+  test:
+    desc: "Run fast unit and contract tests with domain coverage enforcement"
+    cmds:
+      - uv run pytest -m "not integration and not e2e and not real_llm" --cov --cov-fail-under=85
+      - npm --prefix frontend run test -- --run
+
+  test:integration:
+    desc: "Run integration tests against Firestore/PubSub emulators"
+    cmds:
+      - uv run pytest -m "integration"
+
+  test:golden:
+    desc: "Run golden prompt evaluation tests against mock or live LLM"
+    cmds:
+      - uv run pytest services/agent-engine/tests/golden/
+
+  schemas:export:
+    desc: "Export Pydantic contracts to JSON Schema and regenerate TypeScript types"
+    cmds:
+      - uv run python scripts/export_schemas.py
+      - npm --prefix frontend run gen:types
+
+  ai:models:
+    desc: "Check and verify availability of configured Gemini model IDs in Vertex AI"
+    cmds:
+      - uv run python scripts/check_models.py
+
+  sim:generate:
+    desc: "Generate synthetic transaction dataset (500 users, 10k baseline transactions)"
+    cmds:
+      - uv run python simulation/src/aegis_sim/generate_sims.py
+
+  sim:redteam:
+    desc: "Execute adversarial red-team evaluation suite and generate performance report"
+    cmds:
+      - uv run python simulation/src/aegis_sim/run_adversarial_test.py --env={{.ENV}}
+
+  dev:emulators:
+    desc: "Start Firebase local emulators (Firestore, Auth)"
+    cmds:
+      - firebase emulators:start --only firestore,auth
+
+  dev:gateway:
+    desc: "Run api-gateway on port 8080"
+    cmds:
+      - uv run uvicorn aegis_gateway.main:app --host 0.0.0.0 --port 8080 --reload
+
+  dev:engine:
+    desc: "Run agent-engine on port 8090"
+    cmds:
+      - uv run uvicorn aegis_engine.main:app --host 0.0.0.0 --port 8090 --reload
+
+  dev:actuator:
+    desc: "Run actuator service on port 8070"
+    cmds:
+      - uv run uvicorn aegis_actuator.main:app --host 0.0.0.0 --port 8070 --reload
+
+  dev:frontend:
+    desc: "Run Vite frontend development server"
+    cmds:
+      - npm --prefix frontend run dev
+
+  build:
+    desc: "Build all container images and frontend production bundle"
+    cmds:
+      - docker build -f services/api-gateway/Dockerfile -t aegis-api-gateway .
+      - docker build -f services/agent-engine/Dockerfile -t aegis-agent-engine .
+      - docker build -f services/actuator/Dockerfile -t aegis-actuator .
+      - npm --prefix frontend run build
+
+  deploy:frontend:
+    desc: "Deploy frontend SPA and rules to Firebase Hosting"
+    cmds:
+      - npm --prefix frontend run build
+      - firebase deploy --only hosting,firestore:rules,firestore:indexes
+
+  clean:
+    desc: "Clean build artifacts, python pycache, and temporary files"
+    cmds:
+      - powershell -Command "Get-ChildItem -Path . -Include __pycache__, .pytest_cache, .mypy_cache, dist -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue"

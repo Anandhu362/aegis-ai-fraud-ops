@@ -1,0 +1,354 @@
+{
+  "$defs": {
+    "CategoryCheck": {
+      "description": "Merchant category risk and novelty.",
+      "properties": {
+        "is_novel": {
+          "default": false,
+          "description": "True if category never observed for user",
+          "title": "Is Novel",
+          "type": "boolean"
+        },
+        "is_high_risk": {
+          "default": false,
+          "description": "True if category is in high-risk list (crypto, etc)",
+          "title": "Is High Risk",
+          "type": "boolean"
+        }
+      },
+      "title": "CategoryCheck",
+      "type": "object"
+    },
+    "DeviceCheck": {
+      "description": "Device identity and novelty check.",
+      "properties": {
+        "is_new": {
+          "default": false,
+          "description": "True if device_id not in user known_devices",
+          "title": "Is New",
+          "type": "boolean"
+        }
+      },
+      "title": "DeviceCheck",
+      "type": "object"
+    },
+    "GeoCheck": {
+      "description": "IP versus transaction location consistency.",
+      "properties": {
+        "country_mismatch": {
+          "default": false,
+          "description": "True if IP country does not match transaction origin country",
+          "title": "Country Mismatch",
+          "type": "boolean"
+        }
+      },
+      "title": "GeoCheck",
+      "type": "object"
+    },
+    "IpReputation": {
+      "description": "IP intelligence and anonymization signals.",
+      "properties": {
+        "is_tor": {
+          "default": false,
+          "description": "True if IP matches known Tor exit node list",
+          "title": "Is Tor",
+          "type": "boolean"
+        },
+        "is_vpn": {
+          "default": false,
+          "description": "True if commercial VPN provider detected",
+          "title": "Is Vpn",
+          "type": "boolean"
+        },
+        "is_hosting": {
+          "default": false,
+          "description": "True if data center or hosting ASN",
+          "title": "Is Hosting",
+          "type": "boolean"
+        },
+        "asn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Autonomous System Number",
+          "title": "Asn"
+        },
+        "asn_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISP, HOSTING, or BUSINESS",
+          "title": "Asn Type"
+        },
+        "abuse_score": {
+          "default": 0,
+          "description": "IP abuse confidence score (0-100)",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Abuse Score",
+          "type": "integer"
+        },
+        "country": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "IP geolocation country code",
+          "title": "Country"
+        },
+        "unknown": {
+          "default": false,
+          "description": "True if IP lookup failed or private IP",
+          "title": "Unknown",
+          "type": "boolean"
+        }
+      },
+      "title": "IpReputation",
+      "type": "object"
+    },
+    "MonetaryAnomaly": {
+      "description": "Statistical deviation of transaction amount against baseline.",
+      "properties": {
+        "z_score": {
+          "default": 0.0,
+          "description": "Standard deviations from mean (clipped [-10, 10])",
+          "title": "Z Score",
+          "type": "number"
+        },
+        "ratio_to_p95": {
+          "default": 0.0,
+          "description": "Ratio of amount to baseline 95th percentile",
+          "title": "Ratio To P95",
+          "type": "number"
+        },
+        "ratio_to_median": {
+          "default": 0.0,
+          "description": "Ratio of amount to baseline median",
+          "title": "Ratio To Median",
+          "type": "number"
+        },
+        "is_anomalous": {
+          "default": false,
+          "description": "True if z_score > 3.0 or ratio_to_p95 > 2.5",
+          "title": "Is Anomalous",
+          "type": "boolean"
+        }
+      },
+      "title": "MonetaryAnomaly",
+      "type": "object"
+    },
+    "TravelCheck": {
+      "description": "Geographic travel velocity analysis.",
+      "properties": {
+        "prev_city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Previous transaction city",
+          "title": "Prev City"
+        },
+        "distance_km": {
+          "default": 0.0,
+          "description": "Haversine distance from previous transaction",
+          "title": "Distance Km",
+          "type": "number"
+        },
+        "elapsed_min": {
+          "default": 0.0,
+          "description": "Elapsed time in minutes since previous transaction",
+          "title": "Elapsed Min",
+          "type": "number"
+        },
+        "speed_kmh": {
+          "default": 0.0,
+          "description": "Required travel speed in km/h",
+          "title": "Speed Kmh",
+          "type": "number"
+        },
+        "impossible": {
+          "default": false,
+          "description": "True if travel speed > 900 km/h over >= 200 km (impossible travel)",
+          "title": "Impossible",
+          "type": "boolean"
+        },
+        "exempt": {
+          "default": false,
+          "description": "True if both transactions are ECOMMERCE without physical card present",
+          "title": "Exempt",
+          "type": "boolean"
+        }
+      },
+      "title": "TravelCheck",
+      "type": "object"
+    },
+    "UserBaseline": {
+      "description": "Historical behavioural baseline for the account.",
+      "properties": {
+        "avg_amount": {
+          "default": 0.0,
+          "description": "90-day mean transaction amount",
+          "title": "Avg Amount",
+          "type": "number"
+        },
+        "std_amount": {
+          "default": 0.0,
+          "description": "90-day standard deviation",
+          "title": "Std Amount",
+          "type": "number"
+        },
+        "median_amount": {
+          "default": 0.0,
+          "description": "90-day median amount",
+          "title": "Median Amount",
+          "type": "number"
+        },
+        "p95_amount": {
+          "default": 0.0,
+          "description": "90-day 95th percentile amount",
+          "title": "P95 Amount",
+          "type": "number"
+        },
+        "tx_count_90d": {
+          "default": 0,
+          "description": "Number of settled transactions in 90 days",
+          "title": "Tx Count 90D",
+          "type": "integer"
+        },
+        "known_categories": {
+          "description": "Historical merchant categories",
+          "items": {
+            "type": "string"
+          },
+          "title": "Known Categories",
+          "type": "array"
+        },
+        "known_countries": {
+          "description": "Historical country codes",
+          "items": {
+            "type": "string"
+          },
+          "title": "Known Countries",
+          "type": "array"
+        },
+        "known_devices": {
+          "description": "Historical device identifiers",
+          "items": {
+            "type": "string"
+          },
+          "title": "Known Devices",
+          "type": "array"
+        },
+        "cold_start": {
+          "default": false,
+          "description": "True if insufficient history (<5 transactions)",
+          "title": "Cold Start",
+          "type": "boolean"
+        },
+        "as_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Baseline computation date (YYYY-MM-DD)",
+          "title": "As Of"
+        }
+      },
+      "title": "UserBaseline",
+      "type": "object"
+    },
+    "VelocityStats": {
+      "description": "Rolling velocity and structuring signals.",
+      "properties": {
+        "count_60s": {
+          "default": 0,
+          "description": "Transactions in last 60 seconds",
+          "title": "Count 60S",
+          "type": "integer"
+        },
+        "count_15m": {
+          "default": 0,
+          "description": "Transactions in last 15 minutes",
+          "title": "Count 15M",
+          "type": "integer"
+        },
+        "near_threshold_count_15m": {
+          "default": 0,
+          "description": "Transactions in $8,000\u2013$9,999 band in last 15 minutes",
+          "title": "Near Threshold Count 15M",
+          "type": "integer"
+        },
+        "in_structuring_band": {
+          "default": false,
+          "description": "Current transaction is in near-threshold structuring band ($8k-$9.99k)",
+          "title": "In Structuring Band",
+          "type": "boolean"
+        },
+        "structuring_hit": {
+          "default": false,
+          "description": "Structuring detected (>=2 transactions in structuring band in 15m window)",
+          "title": "Structuring Hit",
+          "type": "boolean"
+        }
+      },
+      "title": "VelocityStats",
+      "type": "object"
+    }
+  },
+  "description": "Composite enriched feature representation for deterministic & LLM evaluation.",
+  "properties": {
+    "baseline": {
+      "$ref": "#/$defs/UserBaseline"
+    },
+    "monetary": {
+      "$ref": "#/$defs/MonetaryAnomaly"
+    },
+    "category": {
+      "$ref": "#/$defs/CategoryCheck"
+    },
+    "velocity": {
+      "$ref": "#/$defs/VelocityStats"
+    },
+    "ip": {
+      "$ref": "#/$defs/IpReputation"
+    },
+    "travel": {
+      "$ref": "#/$defs/TravelCheck"
+    },
+    "device": {
+      "$ref": "#/$defs/DeviceCheck"
+    },
+    "geo": {
+      "$ref": "#/$defs/GeoCheck"
+    }
+  },
+  "title": "FeatureVector",
+  "type": "object"
+}

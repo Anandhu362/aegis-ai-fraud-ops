@@ -1,0 +1,12 @@
+# Aegis AI Fraud Ops Code Ownership
+
+services/agent-engine/**    @aegis-agents-lead
+services/api-gateway/**     @aegis-backend-lead
+services/actuator/**        @aegis-backend-lead
+packages/**                 @aegis-backend-lead
+frontend/**                 @aegis-frontend-lead
+infra/**                    @aegis-devops-lead
+.github/**                  @aegis-devops-lead
+simulation/**               @aegis-data-lead
+docs/12_*                   @aegis-security-lead
+frontend/firestore.rules    @aegis-security-lead

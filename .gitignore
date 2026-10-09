@@ -1,0 +1,58 @@
+# Environment and secrets
+.env
+*.local
+*.pem
+*.key
+*.cert
+
+# Python virtualenvs and caches
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Firebase & Emulators
+.firebase/
+firestore-debug.log*
+ui-debug.log*
+pubsub-debug.log*
+*.emulator.log
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Simulation generated datasets
+simulation/data/*.csv
+simulation/data/*.jsonl
+!simulation/data/.gitkeep
+
+# OS and IDE caches
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/

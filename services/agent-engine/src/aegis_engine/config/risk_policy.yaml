@@ -1,0 +1,82 @@
+version: "1.0.0"
+description: "Deterministic risk scoring weights, hard-rule floors, and decision bands"
+
+signals:
+  S1_monetary:
+    name: "Monetary Anomaly"
+    weight: 25
+    description: "Z-score > 3.0 or amount > 2.5x 90d p95"
+  S2_novel_category:
+    name: "Novel Merchant Category"
+    weight: 10
+    description: "Category never observed in user 90-day history"
+  S3_high_risk_category:
+    name: "High-Risk Category"
+    weight: 15
+    description: "Cryptocurrency, gambling, money transfer, or wire transfer"
+  S4_velocity_burst:
+    name: "High Velocity Burst"
+    weight: 20
+    description: "More than 3 transactions in 60 seconds"
+  S5_structuring:
+    name: "Near-Threshold Structuring"
+    weight: 30
+    description: "Amount in $8,000-$9,999 with repeated recent activity"
+  S6_anon_network:
+    name: "Anonymized Network"
+    weight: 30
+    description: "Tor exit node or commercial VPN detection"
+  S7_country_mismatch:
+    name: "Country Geolocation Mismatch"
+    weight: 15
+    description: "IP country differs from transaction origin country"
+  S8_travel:
+    name: "Impossible Travel Velocity"
+    weight: 35
+    description: "Physical travel speed exceeding 900 km/h over >= 200 km"
+  S9_new_device:
+    name: "Unrecognized Device"
+    weight: 10
+    description: "Device ID never seen in user historical profile"
+
+hard_rules:
+  H1:
+    name: "Tor Impossible Travel Account Takeover"
+    floor: 90
+    action: "LOCK_ACCOUNT"
+    early_containment: true
+    description: "Tor exit node detected simultaneously with impossible travel (>900 km/h)"
+  H2:
+    name: "Structuring Pattern"
+    floor: 75
+    action: "BLOCK_TX"
+    early_containment: false
+    description: ">= 2 transactions in structuring band ($8k-$9.99k) within 15 minutes"
+  H3:
+    name: "High-Risk Novel Device Escalation"
+    floor: 60
+    action: "REVIEW"
+    early_containment: false
+    description: "High-risk merchant category on a new device with novel category"
+
+risk_bands:
+  LOW:
+    min_score: 0
+    max_score: 29
+    decision: "ALLOW"
+  ELEVATED:
+    min_score: 30
+    max_score: 59
+    decision: "REVIEW"
+  HIGH:
+    min_score: 60
+    max_score: 84
+    decision: "BLOCK_TX"
+  CRITICAL:
+    min_score: 85
+    max_score: 100
+    decision: "LOCK_ACCOUNT"
+
+bounds:
+  orchestrator_max_adjustment: 10
+  orchestrator_min_adjustment: -10
