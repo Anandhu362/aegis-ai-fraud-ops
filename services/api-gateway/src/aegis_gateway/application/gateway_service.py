@@ -388,13 +388,13 @@ class GatewayService:
         seq_suffix = uuid.uuid4().hex[:6].upper()
         match scenario_key:
             case "coffee" | "clean_coffee":
-                target_id = tx_id or f"TX_COFFEE_{seq_suffix}"
+                target_id = tx_id or f"TX_COFFEE{seq_suffix}"
                 tx = create_clean_coffee_scenario(tx_id=target_id)
             case "smurfing" | "structuring":
-                target_id = tx_id or f"TX_SMURF_{seq_suffix}"
+                target_id = tx_id or f"TX_SMURF{seq_suffix}"
                 tx = create_smurfing_scenario(tx_id=target_id)
             case "tor_travel" | "tor_ato" | "impossible_travel":
-                target_id = tx_id or f"TX_ATO_{seq_suffix}"
+                target_id = tx_id or f"TX_ATO{seq_suffix}"
                 tx = create_tor_travel_scenario(tx_id=target_id)
             case _:
                 raise ValidationError(
