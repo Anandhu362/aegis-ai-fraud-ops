@@ -62,7 +62,6 @@ jobs:
   build-and-push:
     name: Build & Push Container Images
     needs: preflight-verification
-    if: "${{ secrets.GCP_SA_KEY != '' }}"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -112,7 +111,6 @@ jobs:
   blue-green-deploy:
     name: Blue/Green Canary Traffic Shift
     needs: build-and-push
-    if: "${{ secrets.GCP_SA_KEY != '' }}"
     runs-on: ubuntu-latest
     permissions:
       contents: read

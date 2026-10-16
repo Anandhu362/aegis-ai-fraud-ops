@@ -18,6 +18,7 @@ from aegis_common.errors import (
 )
 from aegis_common.logging import get_logger
 from decimal import Decimal
+from ipaddress import IPv4Address
 
 from aegis_common.schemas.enums import Channel, Decision, MerchantCategory, RiskLevel, Typology
 from aegis_common.schemas.transaction import Location, Transaction
@@ -49,7 +50,7 @@ except ImportError:
             merchant_category=MerchantCategory.COFFEE_SHOP,
             channel=Channel.CARD_PRESENT,
             device_id="DEV_MARCUS_IPHONE15",
-            ip_address="73.189.42.11",
+            ip_address=IPv4Address("73.189.42.11"),
             location=Location(
                 latitude=37.7749,
                 longitude=-122.4194,
@@ -69,7 +70,7 @@ except ImportError:
             merchant_category=MerchantCategory.MONEY_TRANSFER,
             channel=Channel.ECOMMERCE,
             device_id="DEV_PROXY_BOT",
-            ip_address="198.51.100.84",
+            ip_address=IPv4Address("198.51.100.84"),
             location=Location(
                 latitude=40.7128,
                 longitude=-74.0060,
@@ -89,7 +90,7 @@ except ImportError:
             merchant_category=MerchantCategory.CRYPTOCURRENCY_BROKERAGE,
             channel=Channel.ECOMMERCE,
             device_id="DEV_UNKNOWN_HACKER",
-            ip_address="185.220.101.5",
+            ip_address=IPv4Address("185.220.101.5"),
             location=Location(
                 latitude=50.1109,
                 longitude=8.6821,
@@ -97,6 +98,7 @@ except ImportError:
                 country="DE",
             ),
         )
+
 
 from aegis_gateway.ports.case_repo import CaseRepositoryPort
 from aegis_gateway.ports.dispatcher import InvestigationDispatcherPort
