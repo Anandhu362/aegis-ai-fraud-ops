@@ -25,6 +25,8 @@ infra/keys/
 *service-account*.json
 *.sa.json
 *credentials*.json
+*sa-*.json
+*-key.json
 gcp-key.json
 secrets/
 
