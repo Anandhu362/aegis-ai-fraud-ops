@@ -1,0 +1,1202 @@
+[
+  {
+    "case_id": "TX_LIVE000001",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000001",
+      "user_id": "USR_LUCAS275",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "12.02",
+      "currency": "USD",
+      "merchant": "Starbucks Reserve",
+      "merchant_category": "coffee_shop",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_LUCAS_GALAXY",
+      "ip_address": "72.48.90.244",
+      "location": {
+        "latitude": 39.7392,
+        "longitude": -104.9903,
+        "city": "Denver",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000002",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000002",
+      "user_id": "USR_SARAH840",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "41.89",
+      "currency": "USD",
+      "merchant": "Blue Bottle Coffee",
+      "merchant_category": "coffee_shop",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_SARAH_PIXEL8",
+      "ip_address": "70.114.88.124",
+      "location": {
+        "latitude": 30.2672,
+        "longitude": -97.7431,
+        "city": "Austin",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_ATO000003",
+    "scenario": "ATO_IMPOSSIBLE_TRAVEL",
+    "is_fraud": true,
+    "expected_decision": "LOCK_ACCOUNT",
+    "transaction": {
+      "tx_id": "TX_ATO000003",
+      "user_id": "USR_CHLOE882",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "5535.7",
+      "currency": "USD",
+      "merchant": "Offshore Crypto Gateway International",
+      "merchant_category": "cryptocurrency_brokerage",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_UNRECOGNIZED_357",
+      "ip_address": "193.189.100.12",
+      "location": {
+        "latitude": 50.1109,
+        "longitude": 8.6821,
+        "city": "Frankfurt",
+        "country": "DE"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000004",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000004",
+      "user_id": "USR_AMARA433",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "41.09",
+      "currency": "USD",
+      "merchant": "REI Outdoor Goods",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_AMARA_PIXEL",
+      "ip_address": "76.17.202.56",
+      "location": {
+        "latitude": 33.749,
+        "longitude": -84.388,
+        "city": "Atlanta",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000005",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000005",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "12.67",
+      "currency": "USD",
+      "merchant": "Whole Foods Market",
+      "merchant_category": "grocery",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.205",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000006",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000006",
+      "user_id": "USR_MARCUS712",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "24.2",
+      "currency": "USD",
+      "merchant": "Local Craft Bakery",
+      "merchant_category": "coffee_shop",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_MARCUS_IPHONE15",
+      "ip_address": "73.189.42.224",
+      "location": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "city": "San Francisco",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000007",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000007",
+      "user_id": "USR_SARAH840",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "26.85",
+      "currency": "USD",
+      "merchant": "Blue Bottle Coffee",
+      "merchant_category": "coffee_shop",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_SARAH_PIXEL8",
+      "ip_address": "70.114.88.16",
+      "location": {
+        "latitude": 30.2672,
+        "longitude": -97.7431,
+        "city": "Austin",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000008",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000008",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "55.79",
+      "currency": "USD",
+      "merchant": "Whole Foods Market",
+      "merchant_category": "grocery",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.47",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000009",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000009",
+      "user_id": "USR_JAMES610",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "81.68",
+      "currency": "USD",
+      "merchant": "Apple Store Fifth Ave",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_JAMES_IPAD",
+      "ip_address": "71.232.19.145",
+      "location": {
+        "latitude": 42.3601,
+        "longitude": -71.0589,
+        "city": "Boston",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000010",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000010",
+      "user_id": "USR_MARCUS712",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "21.66",
+      "currency": "USD",
+      "merchant": "Starbucks Reserve",
+      "merchant_category": "coffee_shop",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_MARCUS_IPHONE15",
+      "ip_address": "73.189.42.16",
+      "location": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "city": "San Francisco",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000011",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000011",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.589407Z",
+      "amount": "72.49",
+      "currency": "USD",
+      "merchant": "Trader Joe's",
+      "merchant_category": "grocery",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.182",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000012",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000012",
+      "user_id": "USR_AMARA433",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "99.15",
+      "currency": "USD",
+      "merchant": "7-Eleven Express Fuel",
+      "merchant_category": "fuel",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_AMARA_PIXEL",
+      "ip_address": "76.17.202.21",
+      "location": {
+        "latitude": 33.749,
+        "longitude": -84.388,
+        "city": "Atlanta",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000013",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000013",
+      "user_id": "USR_SOPHIA924",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "41.12",
+      "currency": "USD",
+      "merchant": "Verizon Wireless Fios",
+      "merchant_category": "utilities",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_SOPHIA_IPHONE15",
+      "ip_address": "24.16.140.67",
+      "location": {
+        "latitude": 47.6062,
+        "longitude": -122.3321,
+        "city": "Seattle",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000014",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000014",
+      "user_id": "USR_CHLOE882",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "54.59",
+      "currency": "USD",
+      "merchant": "Trattoria Rustica",
+      "merchant_category": "restaurant",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_CHLOE_MACBOOK",
+      "ip_address": "104.175.40.239",
+      "location": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "city": "Los Angeles",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000015",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000015",
+      "user_id": "USR_SARAH840",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "20.17",
+      "currency": "USD",
+      "merchant": "Blue Bottle Coffee",
+      "merchant_category": "coffee_shop",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_SARAH_PIXEL8",
+      "ip_address": "70.114.88.219",
+      "location": {
+        "latitude": 30.2672,
+        "longitude": -97.7431,
+        "city": "Austin",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000016",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000016",
+      "user_id": "USR_LUCAS275",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "50.93",
+      "currency": "USD",
+      "merchant": "Safeway Organics",
+      "merchant_category": "grocery",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_LUCAS_GALAXY",
+      "ip_address": "72.48.90.223",
+      "location": {
+        "latitude": 39.7392,
+        "longitude": -104.9903,
+        "city": "Denver",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000017",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000017",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "73.48",
+      "currency": "USD",
+      "merchant": "Apple Store Fifth Ave",
+      "merchant_category": "retail",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.91",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000018",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000018",
+      "user_id": "USR_AMARA433",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "46.86",
+      "currency": "USD",
+      "merchant": "Target Stores",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_AMARA_PIXEL",
+      "ip_address": "76.17.202.36",
+      "location": {
+        "latitude": 33.749,
+        "longitude": -84.388,
+        "city": "Atlanta",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000019",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000019",
+      "user_id": "USR_LIAM194",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "17.82",
+      "currency": "USD",
+      "merchant": "Shake Shack",
+      "merchant_category": "restaurant",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_LIAM_IPHONE14",
+      "ip_address": "99.102.14.17",
+      "location": {
+        "latitude": 25.7617,
+        "longitude": -80.1918,
+        "city": "Miami",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000020",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000020",
+      "user_id": "USR_JAMES610",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "119.65",
+      "currency": "USD",
+      "merchant": "Trattoria Rustica",
+      "merchant_category": "restaurant",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_JAMES_IPAD",
+      "ip_address": "71.232.19.104",
+      "location": {
+        "latitude": 42.3601,
+        "longitude": -71.0589,
+        "city": "Boston",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000021",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000021",
+      "user_id": "USR_SOPHIA924",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "86.74",
+      "currency": "USD",
+      "merchant": "Verizon Wireless Fios",
+      "merchant_category": "utilities",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_SOPHIA_IPHONE15",
+      "ip_address": "24.16.140.113",
+      "location": {
+        "latitude": 47.6062,
+        "longitude": -122.3321,
+        "city": "Seattle",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000022",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000022",
+      "user_id": "USR_SARAH840",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "19.06",
+      "currency": "USD",
+      "merchant": "Trader Joe's",
+      "merchant_category": "grocery",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_SARAH_PIXEL8",
+      "ip_address": "70.114.88.231",
+      "location": {
+        "latitude": 30.2672,
+        "longitude": -97.7431,
+        "city": "Austin",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000023",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000023",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "50.47",
+      "currency": "USD",
+      "merchant": "Apple Store Fifth Ave",
+      "merchant_category": "retail",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.215",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000024",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000024",
+      "user_id": "USR_SARAH840",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "62.64",
+      "currency": "USD",
+      "merchant": "Nordstrom Rack",
+      "merchant_category": "retail",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_SARAH_PIXEL8",
+      "ip_address": "70.114.88.146",
+      "location": {
+        "latitude": 30.2672,
+        "longitude": -97.7431,
+        "city": "Austin",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000025",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000025",
+      "user_id": "USR_AMARA433",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "76.76",
+      "currency": "USD",
+      "merchant": "Chevron Fuel Station",
+      "merchant_category": "fuel",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_AMARA_PIXEL",
+      "ip_address": "76.17.202.105",
+      "location": {
+        "latitude": 33.749,
+        "longitude": -84.388,
+        "city": "Atlanta",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000026",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000026",
+      "user_id": "USR_CHLOE882",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "94.81",
+      "currency": "USD",
+      "merchant": "Apple Store Fifth Ave",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_CHLOE_MACBOOK",
+      "ip_address": "104.175.40.77",
+      "location": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "city": "Los Angeles",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000027",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000027",
+      "user_id": "USR_ELENA391",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "84.87",
+      "currency": "USD",
+      "merchant": "Nordstrom Rack",
+      "merchant_category": "retail",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_ELENA_MACBOOK",
+      "ip_address": "68.195.12.54",
+      "location": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "city": "New York",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000028",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000028",
+      "user_id": "USR_CHLOE882",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "27.52",
+      "currency": "USD",
+      "merchant": "Shake Shack",
+      "merchant_category": "restaurant",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_CHLOE_MACBOOK",
+      "ip_address": "104.175.40.82",
+      "location": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "city": "Los Angeles",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000029",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000029",
+      "user_id": "USR_MARCUS712",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "48.16",
+      "currency": "USD",
+      "merchant": "Trader Joe's",
+      "merchant_category": "grocery",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_MARCUS_IPHONE15",
+      "ip_address": "73.189.42.233",
+      "location": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "city": "San Francisco",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000030",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000030",
+      "user_id": "USR_CHLOE882",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "86.84",
+      "currency": "USD",
+      "merchant": "Blue Bottle Coffee",
+      "merchant_category": "coffee_shop",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_CHLOE_MACBOOK",
+      "ip_address": "104.175.40.220",
+      "location": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "city": "Los Angeles",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000031",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000031",
+      "user_id": "USR_ELENA391",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "171.84",
+      "currency": "USD",
+      "merchant": "Pacific Gas & Electric",
+      "merchant_category": "utilities",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_ELENA_MACBOOK",
+      "ip_address": "68.195.12.176",
+      "location": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "city": "New York",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000032",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000032",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "28.78",
+      "currency": "USD",
+      "merchant": "Target Stores",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.146",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000033",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000033",
+      "user_id": "USR_SOPHIA924",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "87.26",
+      "currency": "USD",
+      "merchant": "Wegmans Food Market",
+      "merchant_category": "grocery",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_SOPHIA_IPHONE15",
+      "ip_address": "24.16.140.155",
+      "location": {
+        "latitude": 47.6062,
+        "longitude": -122.3321,
+        "city": "Seattle",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000034",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000034",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "68.59",
+      "currency": "USD",
+      "merchant": "Nordstrom Rack",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.17",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000035",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000035",
+      "user_id": "USR_DAVID518",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "41.12",
+      "currency": "USD",
+      "merchant": "7-Eleven Express Fuel",
+      "merchant_category": "fuel",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_DAVID_GALAXY",
+      "ip_address": "24.148.65.56",
+      "location": {
+        "latitude": 41.8781,
+        "longitude": -87.6298,
+        "city": "Chicago",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000036",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000036",
+      "user_id": "USR_CHLOE882",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "136.35",
+      "currency": "USD",
+      "merchant": "Blue Bottle Coffee",
+      "merchant_category": "coffee_shop",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_CHLOE_MACBOOK",
+      "ip_address": "104.175.40.219",
+      "location": {
+        "latitude": 34.0522,
+        "longitude": -118.2437,
+        "city": "Los Angeles",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000037",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000037",
+      "user_id": "USR_SARAH840",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "6.38",
+      "currency": "USD",
+      "merchant": "Starbucks Reserve",
+      "merchant_category": "coffee_shop",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_SARAH_PIXEL8",
+      "ip_address": "70.114.88.161",
+      "location": {
+        "latitude": 30.2672,
+        "longitude": -97.7431,
+        "city": "Austin",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000038",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000038",
+      "user_id": "USR_ELENA391",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "35.79",
+      "currency": "USD",
+      "merchant": "Verizon Wireless Fios",
+      "merchant_category": "utilities",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_ELENA_MACBOOK",
+      "ip_address": "68.195.12.119",
+      "location": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "city": "New York",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000039",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000039",
+      "user_id": "USR_LIAM194",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "134.17",
+      "currency": "USD",
+      "merchant": "Nobu Downtown",
+      "merchant_category": "restaurant",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_LIAM_IPHONE14",
+      "ip_address": "99.102.14.183",
+      "location": {
+        "latitude": 25.7617,
+        "longitude": -80.1918,
+        "city": "Miami",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000040",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000040",
+      "user_id": "USR_JAMES610",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "64.08",
+      "currency": "USD",
+      "merchant": "Nobu Downtown",
+      "merchant_category": "restaurant",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_JAMES_IPAD",
+      "ip_address": "71.232.19.208",
+      "location": {
+        "latitude": 42.3601,
+        "longitude": -71.0589,
+        "city": "Boston",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000041",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000041",
+      "user_id": "USR_LIAM194",
+      "timestamp": "2026-10-12T22:26:30.595792Z",
+      "amount": "98.66",
+      "currency": "USD",
+      "merchant": "Chevron Fuel Station",
+      "merchant_category": "fuel",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_LIAM_IPHONE14",
+      "ip_address": "99.102.14.206",
+      "location": {
+        "latitude": 25.7617,
+        "longitude": -80.1918,
+        "city": "Miami",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000042",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000042",
+      "user_id": "USR_LUCAS275",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "35.21",
+      "currency": "USD",
+      "merchant": "Wegmans Food Market",
+      "merchant_category": "grocery",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_LUCAS_GALAXY",
+      "ip_address": "72.48.90.188",
+      "location": {
+        "latitude": 39.7392,
+        "longitude": -104.9903,
+        "city": "Denver",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_ATO000043",
+    "scenario": "ATO_IMPOSSIBLE_TRAVEL",
+    "is_fraud": true,
+    "expected_decision": "LOCK_ACCOUNT",
+    "transaction": {
+      "tx_id": "TX_ATO000043",
+      "user_id": "USR_MARCUS712",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "9442.23",
+      "currency": "USD",
+      "merchant": "Offshore Crypto Gateway International",
+      "merchant_category": "cryptocurrency_brokerage",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_UNRECOGNIZED_258",
+      "ip_address": "185.220.101.5",
+      "location": {
+        "latitude": 50.1109,
+        "longitude": 8.6821,
+        "city": "Frankfurt",
+        "country": "DE"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000044",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000044",
+      "user_id": "USR_JAMES610",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "126.13",
+      "currency": "USD",
+      "merchant": "Target Stores",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_JAMES_IPAD",
+      "ip_address": "71.232.19.29",
+      "location": {
+        "latitude": 42.3601,
+        "longitude": -71.0589,
+        "city": "Boston",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000045",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000045",
+      "user_id": "USR_SARAH840",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "73.39",
+      "currency": "USD",
+      "merchant": "Sightglass Roastery",
+      "merchant_category": "coffee_shop",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_SARAH_PIXEL8",
+      "ip_address": "70.114.88.219",
+      "location": {
+        "latitude": 30.2672,
+        "longitude": -97.7431,
+        "city": "Austin",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000046",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000046",
+      "user_id": "USR_MARCUS712",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "64.96",
+      "currency": "USD",
+      "merchant": "Whole Foods Market",
+      "merchant_category": "grocery",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_MARCUS_IPHONE15",
+      "ip_address": "73.189.42.104",
+      "location": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "city": "San Francisco",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000047",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000047",
+      "user_id": "USR_LUCAS275",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "61.93",
+      "currency": "USD",
+      "merchant": "Trader Joe's",
+      "merchant_category": "grocery",
+      "channel": "CARD_PRESENT",
+      "device_id": "DEV_LUCAS_GALAXY",
+      "ip_address": "72.48.90.14",
+      "location": {
+        "latitude": 39.7392,
+        "longitude": -104.9903,
+        "city": "Denver",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000048",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000048",
+      "user_id": "USR_ELENA391",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "148.61",
+      "currency": "USD",
+      "merchant": "Amazon Go Retail",
+      "merchant_category": "retail",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_ELENA_MACBOOK",
+      "ip_address": "68.195.12.142",
+      "location": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "city": "New York",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000049",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000049",
+      "user_id": "USR_LUCAS275",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "76.66",
+      "currency": "USD",
+      "merchant": "ExxonMobil",
+      "merchant_category": "fuel",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_LUCAS_GALAXY",
+      "ip_address": "72.48.90.147",
+      "location": {
+        "latitude": 39.7392,
+        "longitude": -104.9903,
+        "city": "Denver",
+        "country": "US"
+      }
+    }
+  },
+  {
+    "case_id": "TX_LIVE000050",
+    "scenario": "ORGANIC_BENIGN",
+    "is_fraud": false,
+    "expected_decision": "ALLOW",
+    "transaction": {
+      "tx_id": "TX_LIVE000050",
+      "user_id": "USR_ELENA391",
+      "timestamp": "2026-10-12T22:26:30.596298Z",
+      "amount": "78.26",
+      "currency": "USD",
+      "merchant": "Sweetgreen Farm Stand",
+      "merchant_category": "restaurant",
+      "channel": "ECOMMERCE",
+      "device_id": "DEV_ELENA_MACBOOK",
+      "ip_address": "68.195.12.98",
+      "location": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "city": "New York",
+        "country": "US"
+      }
+    }
+  }
+]

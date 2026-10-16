@@ -1,61 +1,124 @@
-# Environment and secrets
+# ==============================================================================
+# Aegis AI Fraud Ops - Master .gitignore
+# Enterprise Banking & Multi-Service Repository Rules
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Secrets, Environment Files & Cloud Credentials (NEVER COMMIT)
+# ------------------------------------------------------------------------------
 .env
+.env.*
+!.env.example
+!.env.*.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+!frontend/.env.*.example
 *.local
 *.pem
 *.key
 *.cert
+*.crt
+*.pfx
+*.p12
 infra/keys/
 *service-account*.json
 *.sa.json
+*credentials*.json
+gcp-key.json
+secrets/
 
-# Python virtualenvs and caches
+# ------------------------------------------------------------------------------
+# 2. Python Virtual Environments, Caches & Bytecode
+# ------------------------------------------------------------------------------
 .venv/
-env/
 venv/
+env/
+ENV/
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+**/.pytest_cache/
+.ruff_cache/
+**/.ruff_cache/
+.mypy_cache/
+**/.mypy_cache/
+.hypothesis/
+**/.hypothesis/
 .coverage
 .coverage.*
 htmlcov/
-.mypy_cache/
-.ruff_cache/
+coverage.xml
 *.egg-info/
+**/*.egg-info/
 .eggs/
 dist/
+**/dist/
 build/
+**/build/
 
-# Node / Frontend
-frontend/node_modules/
+# ------------------------------------------------------------------------------
+# 3. Node.js & Frontend Build Outputs
+# ------------------------------------------------------------------------------
+node_modules/
+**/node_modules/
 frontend/dist/
 frontend/.vite/
+**/.vite/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Firebase & Emulators
+# ------------------------------------------------------------------------------
+# 4. Firebase, Google Cloud Emulators & Runtime Logs
+# ------------------------------------------------------------------------------
 .firebase/
 firestore-debug.log*
 ui-debug.log*
 pubsub-debug.log*
+firebase-debug.log*
 *.emulator.log
+*.log
 
-# Terraform
+# ------------------------------------------------------------------------------
+# 5. Infrastructure as Code (Terraform)
+# ------------------------------------------------------------------------------
 **/.terraform/
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+crash.log
 
-# Simulation generated datasets
+# ------------------------------------------------------------------------------
+# 6. Bulk Simulation Data & Heavy Generated Payloads
+# ------------------------------------------------------------------------------
 simulation/data/*.csv
 simulation/data/*.jsonl
+simulation/data/historical_txs.csv
+simulation/data/eval_set_2000.json
 !simulation/data/.gitkeep
+!simulation/data/eval_report_latest.json
+!simulation/data/eval_report_latest.md
+!simulation/data/eval_set_2000.meta.json
 
-# OS and IDE caches
+# ------------------------------------------------------------------------------
+# 7. Operating System & IDE Artifacts
+# ------------------------------------------------------------------------------
 .DS_Store
+.AppleDouble
+.LSOverride
 Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
 *.swp
 *.swo
+*~
 .idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.gemini/

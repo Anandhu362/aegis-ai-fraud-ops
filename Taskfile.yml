@@ -78,10 +78,25 @@ tasks:
     cmds:
       - uv run python simulation/src/aegis_sim/run_adversarial_test.py --env={{.ENV}}
 
+  sim:stream:
+    desc: "Stream live transactions with Poisson inter-arrival intervals and fraud injection"
+    cmds:
+      - uv run python simulation/src/aegis_sim/stream_live_traffic.py --tps=0.8 --fraud-ratio=0.15
+
   dev:emulators:
     desc: "Start Firebase local emulators (Firestore, Auth)"
     cmds:
       - firebase emulators:start --only firestore,auth
+
+  dev:all:
+    desc: "Launch entire Aegis AI Fraud Ops ecosystem (Gateway, Engine, Actuator, and Dashboard UI)"
+    cmds:
+      - uv run python run_system.py
+
+  dev:all:traffic:
+    desc: "Launch entire Aegis ecosystem and stream real-world live traffic with fraud injection"
+    cmds:
+      - uv run python run_system.py --traffic
 
   dev:gateway:
     desc: "Run api-gateway on port 8080"
@@ -121,6 +136,11 @@ tasks:
     desc: "Initialize Google Cloud & Firebase ecosystem (APIs, Firestore Native, IAM roles, Service Accounts)"
     cmds:
       - powershell -ExecutionPolicy Bypass -File infra/scripts/bootstrap.ps1
+
+  data:clean:
+    desc: "Purge past investigation cases from Firestore, BigQuery, and memory hot-caches to reset the dashboard"
+    cmds:
+      - powershell -ExecutionPolicy Bypass -File clear_dashboard.ps1
 
   clean:
     desc: "Clean build artifacts, python pycache, and temporary files"

@@ -30,11 +30,12 @@ def test_decide_action_low_risk() -> None:
 
 
 def test_decide_action_elevated_risk() -> None:
-    """Elevated risk must result in REVIEW without immediate actuation."""
+    """Elevated risk must result in CHALLENGE_3DS without immediate lock actuation."""
     decision, should_actuate, action = decide_action(RiskLevel.ELEVATED)
-    assert decision == Decision.REVIEW
+    assert decision == Decision.CHALLENGE_3DS
     assert should_actuate is False
     assert action.account_locked is False
+    assert action.challenge_initiated is True
 
 
 def test_decide_action_high_risk() -> None:

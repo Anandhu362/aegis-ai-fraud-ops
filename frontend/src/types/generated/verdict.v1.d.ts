@@ -26,7 +26,7 @@ export type RiskLevel = "LOW" | "ELEVATED" | "HIGH" | "CRITICAL";
 /**
  * Automated policy decision
  */
-export type Decision = "ALLOW" | "REVIEW" | "BLOCK_TX" | "LOCK_ACCOUNT" | "DECLINE_LOCKED";
+export type Decision = "ALLOW" | "REVIEW" | "CHALLENGE_3DS" | "CARD_SUSPENDED" | "BLOCK_TX" | "LOCK_ACCOUNT" | "DECLINE_LOCKED";
 /**
  * True if automated containment was required
  */

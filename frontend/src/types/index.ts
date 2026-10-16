@@ -10,7 +10,7 @@ export interface CaseSummary {
   merchant: string;
   threat_score: number;
   risk_level: "LOW" | "ELEVATED" | "HIGH" | "CRITICAL";
-  decision: "ALLOW" | "REVIEW" | "BLOCK_TX" | "LOCK_ACCOUNT" | "DECLINE_LOCKED";
+  decision: "ALLOW" | "REVIEW" | "CHALLENGE_3DS" | "CARD_SUSPENDED" | "BLOCK_TX" | "LOCK_ACCOUNT" | "DECLINE_LOCKED";
   status: "QUEUED" | "PROCESSING" | "COMPLETED" | "ACTION_TAKEN" | "FAILED";
   timestamp: number;
 }

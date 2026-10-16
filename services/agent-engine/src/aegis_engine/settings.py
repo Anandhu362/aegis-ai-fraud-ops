@@ -14,7 +14,8 @@ class EngineSettings(AegisBaseSettings):
     aegis_model_deep_review: str = "gemini-pro-latest"
 
     aegis_risk_policy_path: str = "config/risk_policy.yaml"
-    aegis_timeout_pipeline_ms: int = 6000
-    aegis_timeout_llm_ms: int = 1500
+    aegis_timeout_pipeline_ms: int = 30000
+    aegis_timeout_llm_ms: int = 8000
     aegis_actuator_url: str = "http://localhost:8070"
+    aegis_bq_dataset: str = "fraud_telemetry"
     aegis_port: int = 8090

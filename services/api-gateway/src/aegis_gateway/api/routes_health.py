@@ -13,6 +13,8 @@ class HealthResponse(BaseModel):
     service: str
 
 
+@router.get("/health", response_model=HealthResponse)
+@router.get("/v1/health", response_model=HealthResponse)
 @router.get("/healthz", response_model=HealthResponse)
 async def healthz() -> HealthResponse:
     """Liveness probe."""

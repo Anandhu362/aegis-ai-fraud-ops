@@ -4,6 +4,7 @@ import os
 import time
 from collections.abc import AsyncGenerator
 
+from aegis_common.logging import get_logger
 from aegis_common.schemas.enums import TelemetryAction, Typology
 from aegis_common.schemas.features import FeatureVector
 from aegis_common.schemas.verdict import ScoreBreakdown
@@ -19,6 +20,8 @@ from aegis_engine.domain.reports import (
     ThreatReport,
 )
 from aegis_engine.settings import EngineSettings
+
+logger = get_logger("aegis.agent.orchestrator")
 
 MIN_SCORE_ADJUSTMENT: int = -10
 MAX_SCORE_ADJUSTMENT: int = 10
@@ -134,7 +137,7 @@ class OrchestratorAgent(BaseAgent):
 
         assessment: OrchestratorAssessment | None = None
 
-        # Live Gemini LLM synthesis if configured
+        # Live Gemini LLM synthesis if configured and not in offline mock mode
         api_key = self._settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
         if not self._settings.is_mock_mode and api_key:
             try:
@@ -158,18 +161,26 @@ class OrchestratorAgent(BaseAgent):
                     f"Signals: {score_breakdown.signals}, Rules: {score_breakdown.rules}\n"
                     "</score_breakdown>\n"
                     "Task:\n"
-                    "1. Determine primary typology (NONE, ACCOUNT_TAKEOVER, STRUCTURING, etc.)\n"
+                    "1. Determine primary typology ('NONE' | 'ACCOUNT_TAKEOVER' | "
+                    "'STRUCTURING' | 'CARD_CLONING' | 'FRIENDLY_FRAUD')\n"
                     "2. Provide bounded score adjustment [-10, 10]\n"
                     "3. Write concise analyst rationale (max 400 chars) and list cited evidence.\n"
-                    "Return strictly JSON matching OrchestratorAssessment."
+                    "Return strictly JSON with keys:\n"
+                    "- typology\n"
+                    "- rationale\n"
+                    "- score_adjustment\n"
+                    "- cited_evidence (list of strings)"
                 )
 
                 config = types.GenerateContentConfig(
                     response_mime_type="application/json",
-                    response_schema=OrchestratorAssessment,
                     temperature=0.1,
                 )
 
+                logger.info(
+                    "Invoking Gemini Orchestrator Synthesis",
+                    model=self._settings.aegis_model_orchestrator,
+                )
                 resp = client.models.generate_content(
                     model=self._settings.aegis_model_orchestrator,
                     contents=prompt,
@@ -181,7 +192,13 @@ class OrchestratorAgent(BaseAgent):
                         MIN_SCORE_ADJUSTMENT, min(MAX_SCORE_ADJUSTMENT, parsed.score_adjustment)
                     )
                     assessment = parsed.model_copy(update={"score_adjustment": clamped_adj})
-            except Exception:
+                    logger.info(
+                        "Gemini Orchestrator completed successfully",
+                        typology=assessment.typology,
+                        adjustment=clamped_adj,
+                    )
+            except Exception as exc:
+                logger.warn("Gemini Orchestrator failed, using fallback", error=str(exc))
                 assessment = None
 
         # Fallback to deterministic synthesis if mock or LLM failed

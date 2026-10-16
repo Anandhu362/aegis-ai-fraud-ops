@@ -4,6 +4,7 @@ import os
 import time
 from collections.abc import AsyncGenerator
 
+from aegis_common.logging import get_logger
 from aegis_common.schemas.enums import TelemetryAction
 from aegis_common.schemas.features import FeatureVector
 from google import genai
@@ -14,6 +15,8 @@ from google.genai import types
 from aegis_engine.application.telemetry import TelemetryEmitter
 from aegis_engine.domain.reports import ThreatReport
 from aegis_engine.settings import EngineSettings
+
+logger = get_logger("aegis.agent.threat_intel")
 
 HIGH_SPEED_KMH_THRESHOLD: float = 800.0
 ELEVATED_SPEED_KMH_THRESHOLD: float = 500.0
@@ -140,7 +143,7 @@ class ThreatIntelAgent(BaseAgent):
 
         report: ThreatReport | None = None
 
-        # Live Gemini LLM execution if configured
+        # Live Gemini LLM execution if configured and not in offline mock mode
         api_key = self._settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
         if not self._settings.is_mock_mode and api_key:
             try:
@@ -159,15 +162,25 @@ class ThreatIntelAgent(BaseAgent):
                     f"New Device: {features.device.is_new}\n"
                     f"Country Mismatch: {features.geo.country_mismatch}\n"
                     "</features>\n"
-                    "Return strictly JSON matching the ThreatReport schema."
+                    "Return strictly JSON with keys:\n"
+                    "- network_risk_level ('LOW' | 'ELEVATED' | 'HIGH')\n"
+                    "- is_tor (boolean)\n"
+                    "- is_vpn (boolean)\n"
+                    "- is_impossible_travel (boolean)\n"
+                    "- threat_intel_score (integer 0-100)\n"
+                    "- findings (list of strings)\n"
+                    "- cited_features (list of strings)"
                 )
 
                 config = types.GenerateContentConfig(
                     response_mime_type="application/json",
-                    response_schema=ThreatReport,
                     temperature=0.0,
                 )
 
+                logger.info(
+                    "Invoking Gemini Threat Intel Specialist",
+                    model=self._settings.aegis_model_specialist,
+                )
                 resp = client.models.generate_content(
                     model=self._settings.aegis_model_specialist,
                     contents=prompt,
@@ -175,7 +188,12 @@ class ThreatIntelAgent(BaseAgent):
                 )
                 if resp.text:
                     report = ThreatReport.model_validate_json(resp.text)
-            except Exception:
+                    logger.info(
+                        "Gemini Threat Intel completed successfully",
+                        score=report.threat_intel_score,
+                    )
+            except Exception as exc:
+                logger.warn("Gemini Threat Intel failed, using fallback", error=str(exc))
                 report = None
 
         # Deterministic fallback if mock mode or LLM failed

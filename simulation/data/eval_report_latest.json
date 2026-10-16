@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-10-12T21:27:22.289259+00:00",
+  "total_cases": 200,
+  "confusion_matrix": {
+    "true_positives": 48,
+    "true_negatives": 152,
+    "false_positives": 0,
+    "false_negatives": 0
+  },
+  "metrics": {
+    "accuracy_pct": 100.0,
+    "fpr_pct": 0.0,
+    "recall_pct": 100.0,
+    "avg_latency_ms": 323.07,
+    "p95_latency_ms": 552.35
+  },
+  "targets": {
+    "accuracy": {
+      "target": "> 98.0%",
+      "passed": true
+    },
+    "fpr": {
+      "target": "< 1.5%",
+      "passed": true
+    },
+    "recall": {
+      "target": "> 97.0%",
+      "passed": true
+    },
+    "latency": {
+      "target": "< 2.8s",
+      "passed": true
+    }
+  },
+  "status": "PASSED"
+}

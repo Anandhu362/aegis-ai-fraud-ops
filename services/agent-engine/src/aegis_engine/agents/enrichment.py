@@ -44,7 +44,9 @@ class EnrichmentAgent(BaseAgent):
         self._ip_intel = ip_intel
         self._actuator = actuator
 
-    async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
+    async def _run_async_impl(  # noqa: PLR0915
+        self, ctx: InvocationContext
+    ) -> AsyncGenerator[Event, None]:
         """Query tools concurrently, assemble FeatureVector, and handle early containment.
 
         Args:
@@ -99,6 +101,25 @@ class EnrichmentAgent(BaseAgent):
             travel_task,
             device_task,
         )
+
+        # Record incoming transaction into rolling profile window
+        if profile_store:
+            loc_dict = None
+            if tx.location:
+                loc_dict = {
+                    "lat": tx.location.latitude,
+                    "lon": tx.location.longitude,
+                    "city": tx.location.city or "",
+                    "country": tx.location.country or "US",
+                    "channel": tx.channel,
+                }
+            await profile_store.record_transaction(
+                user_id=tx.user_id,
+                amount=float(tx.amount),
+                timestamp=tx.timestamp,
+                location=loc_dict,
+                device_id=tx.device_id,
+            )
 
         # 2. Compute monetary and category anomaly metrics
         monetary = compute_monetary_anomaly(float(tx.amount), baseline)

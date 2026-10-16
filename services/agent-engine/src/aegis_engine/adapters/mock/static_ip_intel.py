@@ -57,7 +57,19 @@ class StaticIpIntelAdapter:
                 unknown=False,
             )
 
-        # Clean residential IP default
+        # Clean residential IP default with authentic country mapping
+        res_country = "US"
+        if ip_str.startswith("122.215."):
+            res_country = "JP"
+        elif ip_str.startswith("91.65."):
+            res_country = "DE"
+        elif ip_str.startswith("82.165."):
+            res_country = "GB"
+        elif ip_str.startswith("84.241."):
+            res_country = "NL"
+        elif ip_str.startswith("142.112."):
+            res_country = "CA"
+
         return IpReputation(
             is_tor=False,
             is_vpn=False,
@@ -65,6 +77,6 @@ class StaticIpIntelAdapter:
             asn="AS7922",
             asn_type="ISP",
             abuse_score=0,
-            country="US",
+            country=res_country,
             unknown=False,
         )

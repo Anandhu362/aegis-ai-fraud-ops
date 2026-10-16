@@ -70,13 +70,15 @@ def decide_action(
 
         case RiskLevel.ELEVATED:
             return (
-                Decision.REVIEW,
+                Decision.CHALLENGE_3DS,
                 False,
                 ActuatorAction(
                     account_locked=False,
                     tx_blocked=False,
-                    alert_dispatched=False,
-                    dispatch_channel="LOG_ONLY",
+                    alert_dispatched=True,
+                    dispatch_channel="SMS_OTP",
+                    challenge_initiated=True,
+                    challenge_channel="SMS_OTP",
                 ),
             )
 

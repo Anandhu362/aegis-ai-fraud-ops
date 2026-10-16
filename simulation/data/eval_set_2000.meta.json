@@ -1,0 +1,9 @@
+{
+  "dataset_name": "eval_set_2000.json",
+  "total_cases": 2000,
+  "benign_cases": 1500,
+  "adversarial_cases": 500,
+  "seed": 42,
+  "sha256": "08e288e575bba5a0822daea8880cf4e32e3889b0b1845d4aa14bb8c903c2d1f7",
+  "generated_at": "2026-10-12T21:27:09.985840+00:00"
+}

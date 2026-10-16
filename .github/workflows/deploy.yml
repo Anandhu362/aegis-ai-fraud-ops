@@ -1,0 +1,222 @@
+name: CD - Cloud Run Blue/Green Deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Target deployment environment (dev | demo | prod)"
+        required: true
+        default: "demo"
+
+env:
+  GCP_PROJECT: aegis-fraud-ops-2026
+  GCP_REGION: us-central1
+  ARTIFACT_REPO: aegis
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Stage 1: Quality Gate & Test Verification
+  # ----------------------------------------------------------------------------
+  preflight-verification:
+    name: Preflight Tests & Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Sync Python workspace
+        run: uv sync --all-packages
+
+      - name: Verify Code Quality (Ruff & Mypy)
+        run: |
+          uv run ruff check .
+          uv run mypy --strict packages/ services/
+
+      - name: Run Pytest Test Suite
+        run: uv run pytest -m "not integration and not e2e and not real_llm" --cov
+
+      - name: Set up Node.js & Verify Frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Frontend Build Verification
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+
+  # ----------------------------------------------------------------------------
+  # Stage 2: Build & Push Images to Artifact Registry
+  # ----------------------------------------------------------------------------
+  build-and-push:
+    name: Build & Push Container Images
+    needs: preflight-verification
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT }}
+          # Recommended: Workload Identity Federation (or credentials_json for hackathon)
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build & Push Microservices
+        run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          REGISTRY="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REPO }}"
+          
+          # 1. API Gateway
+          docker build -f services/api-gateway/Dockerfile \
+            -t $REGISTRY/api-gateway:$COMMIT_SHA \
+            -t $REGISTRY/api-gateway:latest .
+          docker push $REGISTRY/api-gateway:$COMMIT_SHA
+          docker push $REGISTRY/api-gateway:latest
+
+          # 2. Agent Engine
+          docker build -f services/agent-engine/Dockerfile \
+            -t $REGISTRY/agent-engine:$COMMIT_SHA \
+            -t $REGISTRY/agent-engine:latest .
+          docker push $REGISTRY/agent-engine:$COMMIT_SHA
+          docker push $REGISTRY/agent-engine:latest
+
+          # 3. Actuator
+          docker build -f services/actuator/Dockerfile \
+            -t $REGISTRY/actuator:$COMMIT_SHA \
+            -t $REGISTRY/actuator:latest .
+          docker push $REGISTRY/actuator:$COMMIT_SHA
+          docker push $REGISTRY/actuator:latest
+
+  # ----------------------------------------------------------------------------
+  # Stage 3: Blue-Green Canary Deployment & Automated Rollback
+  # ----------------------------------------------------------------------------
+  blue-green-deploy:
+    name: Blue/Green Canary Traffic Shift
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Deploy New Revision with 0% Traffic (Green Tag)
+        run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          REGISTRY="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REPO }}"
+
+          echo "🚀 Deploying revision with tag 'green' (0% live traffic)..."
+
+          # 1. Deploy Actuator
+          gcloud run deploy aegis-actuator \
+            --image $REGISTRY/actuator:$COMMIT_SHA \
+            --region ${{ env.GCP_REGION }} \
+            --ingress internal \
+            --no-allow-unauthenticated \
+            --tag green \
+            --no-traffic
+
+          # 2. Deploy Agent Engine (with Secret Manager)
+          gcloud run deploy aegis-agent-engine \
+            --image $REGISTRY/agent-engine:$COMMIT_SHA \
+            --region ${{ env.GCP_REGION }} \
+            --ingress internal-and-cloud-load-balancing \
+            --no-allow-unauthenticated \
+            --set-secrets GEMINI_API_KEY=aegis-gemini-api-key:latest \
+            --set-env-vars AEGIS_ADAPTER_MODE=gcp,AEGIS_ENV=demo \
+            --tag green \
+            --no-traffic
+
+          # 3. Deploy API Gateway (Public with Secret Manager for JWT)
+          gcloud run deploy aegis-api-gateway \
+            --image $REGISTRY/api-gateway:$COMMIT_SHA \
+            --region ${{ env.GCP_REGION }} \
+            --allow-unauthenticated \
+            --set-secrets JWT_SECRET=aegis-jwt-secret:latest,AEGIS_API_KEYS=aegis-api-keys:latest \
+            --tag green \
+            --no-traffic
+
+      - name: Execute Live Smoke Tests & Health Probes Against Green Revision
+        id: smoke_tests
+        run: |
+          echo "🔍 Fetching Green Tagged URL for verification..."
+          GATEWAY_URL=$(gcloud run services describe aegis-api-gateway \
+            --region ${{ env.GCP_REGION }} \
+            --format='value(status.traffic[0].url)')
+          
+          # Format for tagged revision: https://green---<service>-<hash>.a.run.app
+          GREEN_URL=$(gcloud run services describe aegis-api-gateway \
+            --region ${{ env.GCP_REGION }} \
+            --format='json' | jq -r '.status.traffic[] | select(.tag=="green") | .url')
+
+          echo "Targeting Green URL: $GREEN_URL"
+
+          # Test 1: Health Probe
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$GREEN_URL/v1/health")
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ Health check failed with status $HTTP_STATUS"
+            exit 1
+          fi
+          echo "✅ Health check passed (HTTP 200)"
+
+          # Test 2: Authentication Handshake
+          LOGIN_RESP=$(curl -s -X POST "$GREEN_URL/v1/auth/login" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"demo@aegis.com","password":"password"}')
+          
+          TOKEN=$(echo $LOGIN_RESP | jq -r '.access_token')
+          if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
+            echo "❌ Authentication probe failed: No access_token returned"
+            exit 1
+          fi
+          echo "✅ Authentication handshake passed (JWT Token issued)"
+
+          # Test 3: Authenticated Session Validation
+          ME_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$GREEN_URL/v1/auth/me" \
+            -H "Authorization: Bearer $TOKEN")
+          if [ "$ME_STATUS" != "200" ]; then
+            echo "❌ Authenticated /v1/auth/me session check failed with status $ME_STATUS"
+            exit 1
+          fi
+          echo "✅ Session validation probe passed (HTTP 200)"
+
+      - name: Promote Green Revision to 100% Traffic (Zero-Downtime Shift)
+        if: steps.smoke_tests.outcome == 'success'
+        run: |
+          echo "✅ All automated health & auth probes passed. Shifting 100% traffic to Green..."
+          gcloud run services update-traffic aegis-actuator --region ${{ env.GCP_REGION }} --to-tags green=100
+          gcloud run services update-traffic aegis-agent-engine --region ${{ env.GCP_REGION }} --to-tags green=100
+          gcloud run services update-traffic aegis-api-gateway --region ${{ env.GCP_REGION }} --to-tags green=100
+          echo "🎉 Blue/Green deployment complete! New revision is live."
+
+      - name: Automated Rollback on Smoke Test Failure
+        if: failure()
+        run: |
+          echo "🚨 CRITICAL: Smoke tests failed on Green revision!"
+          echo "🔄 Existing Blue revision was untouched and remains 100% active. Zero downtime incurred."
+          echo "Rolling back tagged revision..."
+          gcloud run services update-traffic aegis-api-gateway --region ${{ env.GCP_REGION }} --to-latest=false || true

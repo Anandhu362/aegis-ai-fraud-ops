@@ -38,6 +38,12 @@ class ActuatorAction(BaseModel):
         default=False,
         description="True if lockout occurred before orchestrator verdict via early containment",
     )
+    challenge_initiated: bool = Field(
+        default=False, description="True if step-up 3DS authentication challenge was triggered"
+    )
+    challenge_channel: str = Field(
+        default="SMS_OTP", description="Channel used for 3DS authentication challenge"
+    )
 
 
 class CaseNarrative(BaseModel):

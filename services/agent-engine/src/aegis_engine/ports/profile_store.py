@@ -61,3 +61,22 @@ class ProfileStore(Protocol):
             True if recognized, False if novel device.
         """
         ...
+
+    async def record_transaction(
+        self,
+        user_id: str,
+        amount: float,
+        timestamp: datetime,
+        location: dict[str, Any] | None = None,
+        device_id: str | None = None,
+    ) -> None:
+        """Record an incoming transaction to update rolling velocity and location history.
+
+        Args:
+            user_id: Customer identifier.
+            amount: Transaction monetary amount.
+            timestamp: Transaction execution timestamp.
+            location: Optional geographic location dict (lat, lon, city, country).
+            device_id: Optional client device hash.
+        """
+        ...

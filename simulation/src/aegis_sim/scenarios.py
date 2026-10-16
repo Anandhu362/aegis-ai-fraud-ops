@@ -14,14 +14,14 @@ def create_clean_coffee_scenario(tx_id: str = "TX_COFFEE001") -> Transaction:
     """
     return Transaction(
         tx_id=tx_id,
-        user_id="USR_4401",
+        user_id="USR_MARCUS712",
         timestamp=datetime.now(UTC),
         amount=Decimal("4.50"),
         currency="USD",
         merchant="Blue Bottle Coffee",
         merchant_category=MerchantCategory.COFFEE_SHOP,
         channel=Channel.CARD_PRESENT,
-        device_id="DEV_COFFEE_01",
+        device_id="DEV_MARCUS_IPHONE15",
         ip_address="73.189.42.11",  # type: ignore[arg-type]
         location=Location(
             latitude=37.7749,
@@ -39,15 +39,15 @@ def create_smurfing_scenario(tx_id: str = "TX_SMURF001") -> Transaction:
     """
     return Transaction(
         tx_id=tx_id,
-        user_id="USR_4403",
+        user_id="USR_SARAH840",
         timestamp=datetime.now(UTC),
         amount=Decimal("9800.00"),
         currency="USD",
-        merchant="Fast Wire Transfers LLC",
+        merchant="Express Money Transfer Systems LLC",
         merchant_category=MerchantCategory.MONEY_TRANSFER,
         channel=Channel.ECOMMERCE,
-        device_id="DEV_SMURF_01",
-        ip_address="73.189.42.11",  # type: ignore[arg-type]
+        device_id="DEV_PROXY_BOT",
+        ip_address="198.51.100.84",  # type: ignore[arg-type]
         location=Location(
             latitude=40.7128,
             longitude=-74.0060,
@@ -60,12 +60,12 @@ def create_smurfing_scenario(tx_id: str = "TX_SMURF001") -> Transaction:
 def create_tor_travel_scenario(tx_id: str = "TX_ATO001") -> Transaction:
     """Scenario 3: Impossible travel + Tor exit node Account Takeover ($12,500 crypto).
 
-    Victim in Dubai 12 min ago -> London e-com transaction over Tor exit node.
+    Victim in New York 14 min ago -> Frankfurt e-com transaction over Tor exit node.
     Triggers S1, S2, S3, S6, S8, S9, S10 and H1 hard floor -> LOCK_ACCOUNT (early containment).
     """
     return Transaction(
         tx_id=tx_id,
-        user_id="USR_4402",
+        user_id="USR_ELENA391",
         timestamp=datetime.now(UTC),
         amount=Decimal("12500.00"),
         currency="USD",
@@ -75,9 +75,10 @@ def create_tor_travel_scenario(tx_id: str = "TX_ATO001") -> Transaction:
         device_id="DEV_UNKNOWN_HACKER",
         ip_address="185.220.101.5",  # type: ignore[arg-type]
         location=Location(
-            latitude=51.5074,
-            longitude=-0.1278,
-            city="London",
-            country="GB",
+            latitude=50.1109,
+            longitude=8.6821,
+            city="Frankfurt",
+            country="DE",
         ),
     )
+
