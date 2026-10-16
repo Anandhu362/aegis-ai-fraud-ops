@@ -67,9 +67,7 @@ class FirestoreTelemetrySinkAdapter:
                 .document(f"{event.seq:04d}")
             )
 
-            action_val = (
-                event.action.value if hasattr(event.action, "value") else str(event.action)
-            )
+            action_val = event.action.value if hasattr(event.action, "value") else str(event.action)
             data: dict[str, Any] = {
                 "seq": event.seq,
                 "agent": event.agent,
@@ -130,9 +128,7 @@ class FirestoreTelemetrySinkAdapter:
 
             score_bd = verdict.score_breakdown
             rules = score_bd.rules if score_bd else []
-            signals_json = (
-                json.dumps(score_bd.signals) if score_bd and score_bd.signals else "{}"
-            )
+            signals_json = json.dumps(score_bd.signals) if score_bd and score_bd.signals else "{}"
             llm_adj = score_bd.llm_adjustment if score_bd else 0
 
             row = [

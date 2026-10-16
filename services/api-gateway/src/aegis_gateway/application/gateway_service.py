@@ -22,13 +22,12 @@ from aegis_common.schemas.transaction import Transaction
 from aegis_common.schemas.verdict import (
     ActuatorAction,
     AnalystDecision,
-    CaseNarrative,
     LatencyBreakdown,
     ModelVersions,
     ScoreBreakdown,
     Verdict,
 )
-from aegis_sim.scenarios import (
+from aegis_sim.scenarios import (  # type: ignore[import-untyped]
     create_clean_coffee_scenario,
     create_smurfing_scenario,
     create_tor_travel_scenario,
@@ -164,17 +163,28 @@ class GatewayService:
             )
             fast_decline = Verdict(
                 tx_id=tx.tx_id,
+                user_id=tx.user_id,
                 threat_score=100 if not is_card_suspension else 85,
                 risk_level=RiskLevel.CRITICAL if not is_card_suspension else RiskLevel.HIGH,
-                decision=Decision.DECLINE_LOCKED if not is_card_suspension else Decision.CARD_SUSPENDED,
-                typology=Typology.ACCOUNT_TAKEOVER if not is_card_suspension else Typology.CARD_TESTING,
-                triage_tier="FAST_DECLINE",
+                decision=Decision.DECLINE_LOCKED
+                if not is_card_suspension
+                else Decision.CARD_SUSPENDED,
+                typology=Typology.ACCOUNT_TAKEOVER
+                if not is_card_suspension
+                else Typology.CARD_TESTING,
+                should_actuate=True,
+                rationale=(
+                    "Account is under containment. Declined at Gateway Tier 0 Hot-Shield in < 1ms without LLM invocation."
+                    if not is_card_suspension
+                    else "Card is suspended due to excessive unverified 3DS attempts. Declined at Gateway Tier 0 Hot-Shield in < 1ms without LLM invocation."
+                ),
+                cited_evidence=["GATEWAY_HOT_SHIELD_BLACKLIST"],
                 score_breakdown=ScoreBreakdown(
                     base=100 if not is_card_suspension else 85,
                     floor=100 if not is_card_suspension else 85,
-                    signals=0,
-                    rules=0,
-                    model_adjustment=0,
+                    llm_adjustment=0,
+                    signals={},
+                    rules=["H3"],
                 ),
                 actuator_action=ActuatorAction(
                     account_locked=not is_card_suspension,
@@ -182,30 +192,16 @@ class GatewayService:
                     alert_dispatched=False,
                     dispatch_channel="LOG_ONLY",
                 ),
-                narrative=CaseNarrative(
-                    analyst_summary=(
-                        "Account is under containment. Declined at Gateway Tier 0 Hot-Shield in < 1ms without LLM invocation."
-                        if not is_card_suspension
-                        else "Card is suspended due to excessive unverified 3DS attempts. Declined at Gateway Tier 0 Hot-Shield in < 1ms without LLM invocation."
-                    ),
-                    policy_action="DECLINE_LOCKED" if not is_card_suspension else "CARD_SUSPENDED",
-                    evidence_citations=["GATEWAY_HOT_SHIELD_BLACKLIST"],
+                latency_ms=LatencyBreakdown(
+                    total=1,
+                    enrichment=0,
+                    specialists=0,
+                    orchestrator=0,
+                    policy=0,
                 ),
-                latency=LatencyBreakdown(
-                    total_ms=1,
-                    enrichment_ms=0,
-                    triage_ms=0,
-                    specialist_ms=0,
-                    orchestrator_ms=0,
-                    policy_ms=0,
-                    actuator_ms=0,
+                versions=ModelVersions(
+                    policy="1.0.0",
                 ),
-                model_versions=ModelVersions(
-                    orchestrator_version="none",
-                    prompt_version="v1.0",
-                    policy_version="v1.0",
-                ),
-                created_at=datetime.now(UTC),
             )
             if mode == "sync":
                 await self.case_repo.save_verdict(fast_decline)
@@ -231,13 +227,16 @@ class GatewayService:
             self._blacklisted_accounts.add(tx.user_id)
             suspend_verdict = Verdict(
                 tx_id=tx.tx_id,
+                user_id=tx.user_id,
                 threat_score=85,
                 risk_level=RiskLevel.HIGH,
                 decision=Decision.CARD_SUSPENDED,
                 typology=Typology.CARD_TESTING,
-                triage_tier="MULTI_ATTEMPT_SHIELD",
+                should_actuate=True,
+                rationale="Card exceeded 3 consecutive unverified 3DS attempts in 60s. Card suspended and added to Tier 0 Hot-Shield.",
+                cited_evidence=["EXCEEDED_MAX_3DS_ATTEMPTS"],
                 score_breakdown=ScoreBreakdown(
-                    base=85, floor=85, signals=0, rules=0, model_adjustment=0
+                    base=85, floor=85, llm_adjustment=0, signals={}, rules=["H3"]
                 ),
                 actuator_action=ActuatorAction(
                     account_locked=False,
@@ -246,26 +245,16 @@ class GatewayService:
                     dispatch_channel="SMS_ALERT",
                     challenge_initiated=False,
                 ),
-                narrative=CaseNarrative(
-                    analyst_summary="Card exceeded 3 consecutive unverified 3DS attempts in 60s. Card suspended and added to Tier 0 Hot-Shield.",
-                    policy_action="CARD_SUSPENDED",
-                    evidence_citations=["EXCEEDED_MAX_3DS_ATTEMPTS"],
+                latency_ms=LatencyBreakdown(
+                    total=2,
+                    enrichment=0,
+                    specialists=0,
+                    orchestrator=0,
+                    policy=0,
                 ),
-                latency=LatencyBreakdown(
-                    total_ms=2,
-                    enrichment_ms=0,
-                    triage_ms=0,
-                    specialist_ms=0,
-                    orchestrator_ms=0,
-                    policy_ms=0,
-                    actuator_ms=0,
+                versions=ModelVersions(
+                    policy="1.0.0",
                 ),
-                model_versions=ModelVersions(
-                    orchestrator_version="none",
-                    prompt_version="v1.0",
-                    policy_version="v1.0",
-                ),
-                created_at=datetime.now(UTC),
             )
             if mode == "sync":
                 await self.case_repo.save_verdict(suspend_verdict)
@@ -349,7 +338,7 @@ class GatewayService:
     async def get_metrics_summary(self) -> dict[str, object]:
         """Return system metrics summary enriched with AI token burn and cost estimates."""
         summary = await self.case_repo.get_metrics_summary()
-        total = int(summary.get("processed_count", 0) or 0)
+        total = int(str(summary.get("processed_count", 0) or 0))
         summary["tokens_per_investigation"] = 374
         summary["cost_per_investigation"] = "$0.000075"
         summary["ai_quota_burn_usd"] = f"${(total * 0.000075):.4f}"

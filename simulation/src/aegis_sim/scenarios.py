@@ -81,4 +81,3 @@ def create_tor_travel_scenario(tx_id: str = "TX_ATO001") -> Transaction:
             country="DE",
         ),
     )
-

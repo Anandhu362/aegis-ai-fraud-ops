@@ -48,4 +48,3 @@ class CaseRepositoryPort(Protocol):
     async def clear(self) -> int:
         """Purge all stored/cached verdicts and notify listeners."""
         ...
-

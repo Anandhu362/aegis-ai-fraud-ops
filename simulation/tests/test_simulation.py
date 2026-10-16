@@ -23,7 +23,6 @@ def test_scenario_creators() -> None:
     assert smurf.amount == 9800.00
     assert smurf.user_id in ("USR_SARAH840", "USR_4403")
 
-
     tor = create_tor_travel_scenario()
     assert tor.amount == 12500.00
     assert str(tor.ip_address) == "185.220.101.5"

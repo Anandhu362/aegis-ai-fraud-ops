@@ -77,8 +77,7 @@ async def main() -> None:
     print(f"    [OK] BigQuery returned {len(rows)} record(s) from table 'investigation_results'!")
     for r in rows:
         print(
-            f"         BigQuery Row: tx_id={r.tx_id}, "
-            f"decision={r.decision}, score={r.threat_score}"
+            f"         BigQuery Row: tx_id={r.tx_id}, decision={r.decision}, score={r.threat_score}"
         )
 
     print("\n==================================================================")

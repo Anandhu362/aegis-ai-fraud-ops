@@ -26,4 +26,3 @@ async def get_metrics_summary(
     and average latency.
     """
     return await service.get_metrics_summary()
-

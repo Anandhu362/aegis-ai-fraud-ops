@@ -178,14 +178,10 @@ def test_clear_investigations(client: TestClient) -> None:
 
 
 def test_auth_login_and_logout(client: TestClient) -> None:
-    bad_resp = client.post(
-        "/v1/auth/login", json={"email": "demo@aegis.com", "password": "wrong"}
-    )
+    bad_resp = client.post("/v1/auth/login", json={"email": "demo@aegis.com", "password": "wrong"})
     assert bad_resp.status_code == 401
 
-    resp = client.post(
-        "/v1/auth/login", json={"email": "demo@aegis.com", "password": "password"}
-    )
+    resp = client.post("/v1/auth/login", json={"email": "demo@aegis.com", "password": "password"})
     assert resp.status_code == 200
     data = resp.json()
     assert "access_token" in data
@@ -220,6 +216,3 @@ def test_policies_endpoint(client: TestClient) -> None:
     assert data["policy_version"] == "v1.1"
     assert len(data["hard_floors"]) >= 3
     assert data["containment_rule"]["min_score"] == 85
-
-
-

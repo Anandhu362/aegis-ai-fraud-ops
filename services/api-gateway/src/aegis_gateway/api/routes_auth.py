@@ -9,6 +9,7 @@ import hmac
 import json
 import threading
 import time
+from typing import Any
 
 from aegis_common.errors import AuthenticationError
 from fastapi import APIRouter, Header, HTTPException, Request, status
@@ -44,7 +45,7 @@ class JwtManager:
         padding = "=" * (-len(s) % 4)
         return base64.urlsafe_b64decode(s + padding)
 
-    def encode(self, payload: dict, expires_in_seconds: int = 86400) -> str:
+    def encode(self, payload: dict[str, Any], expires_in_seconds: int = 86400) -> str:
         """Sign and encode claims dictionary into a JWT bearer token."""
         now = int(time.time())
         claims = dict(payload)
@@ -61,7 +62,7 @@ class JwtManager:
         sig_b64 = self._b64url_encode(sig)
         return f"{h_b64}.{p_b64}.{sig_b64}"
 
-    def decode(self, token: str) -> dict:
+    def decode(self, token: str) -> dict[str, Any]:
         """Validate signature, expiration, and return decoded token payload."""
         with _revocation_lock:
             if token in _revoked_tokens:
@@ -84,11 +85,12 @@ class JwtManager:
             raise ValueError("Invalid JWT token signature")
 
         try:
-            payload = json.loads(self._b64url_decode(p_b64).decode("utf-8"))
+            raw_payload = json.loads(self._b64url_decode(p_b64).decode("utf-8"))
+            payload: dict[str, Any] = dict(raw_payload) if isinstance(raw_payload, dict) else {}
         except Exception as err:
             raise ValueError("Malformed token claims payload") from err
 
-        if int(time.time()) > payload.get("exp", 0):
+        if int(time.time()) > int(str(payload.get("exp", 0))):
             raise ValueError("Session token has expired")
 
         return payload
@@ -198,11 +200,16 @@ async def login(req: LoginRequest, request: Request) -> LoginResponse:
         display_name = "Anandhu"
 
     # Resolve approved permissions by role
-    role = req.role if req.role in (
-        "L2 Senior Fraud Ops",
-        "SOC Analyst",
-        "Compliance Auditor",
-    ) else "L2 Senior Fraud Ops"
+    role = (
+        req.role
+        if req.role
+        in (
+            "L2 Senior Fraud Ops",
+            "SOC Analyst",
+            "Compliance Auditor",
+        )
+        else "L2 Senior Fraud Ops"
+    )
 
     permissions = ["triage", "investigate"]
     if role in ("L2 Senior Fraud Ops", "SOC Analyst"):

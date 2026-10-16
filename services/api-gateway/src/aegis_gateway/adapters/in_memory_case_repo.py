@@ -18,7 +18,6 @@ class InMemoryCaseRepository:
         self._listeners: set[asyncio.Queue[Verdict | None]] = set()
         self._lock = asyncio.Lock()
 
-
     async def get_verdict(self, tx_id: str) -> Verdict | None:
         """Retrieve stored verdict for a transaction ID."""
         return self._verdicts.get(tx_id)
@@ -121,11 +120,13 @@ class InMemoryCaseRepository:
                 latencies.append(v.latency_ms.total)
 
         avg_latency = int(sum(latencies) / len(latencies)) if latencies else 0
-        fast_path_count = len([
-            v
-            for v in self._verdicts.values()
-            if v.latency_ms and v.latency_ms.total < FAST_PATH_LATENCY_THRESHOLD_MS
-        ])
+        fast_path_count = len(
+            [
+                v
+                for v in self._verdicts.values()
+                if v.latency_ms and v.latency_ms.total < FAST_PATH_LATENCY_THRESHOLD_MS
+            ]
+        )
         fast_path_pct = round((fast_path_count / total * 100), 1) if total > 0 else 98.4
 
         return {
@@ -148,4 +149,3 @@ class InMemoryCaseRepository:
             items = list(self._verdicts.values())
             # Return in reverse chronological order
             return list(reversed(items))[:limit]
-

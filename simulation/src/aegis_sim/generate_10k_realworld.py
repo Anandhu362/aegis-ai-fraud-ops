@@ -274,9 +274,7 @@ class RealWorldTrafficEngine:
                 merchant_category=MerchantCategory.ELECTRONICS,
                 channel=Channel.ECOMMERCE,
                 device_id=f"DEV_NEW_IPHONE_{random.randint(100, 999)}",
-                ip_address=IPv4Address(
-                    f"172.56.{random.randint(10, 90)}.{random.randint(2, 250)}"
-                ),
+                ip_address=IPv4Address(f"172.56.{random.randint(10, 90)}.{random.randint(2, 250)}"),
                 location=Location(
                     latitude=cust.profile.home_latitude + random.uniform(-0.02, 0.02),
                     longitude=cust.profile.home_longitude + random.uniform(-0.02, 0.02),
@@ -306,9 +304,7 @@ class RealWorldTrafficEngine:
         ip_prefix = subnet.rsplit(".", 1)[0]
         ip = f"{ip_prefix}.{random.randint(2, 250)}"
         device_id = (
-            cust.devices[0].device_id
-            if cust.devices
-            else f"DEV_{cust.profile.user_id}_PHONE"
+            cust.devices[0].device_id if cust.devices else f"DEV_{cust.profile.user_id}_PHONE"
         )
 
         tx = Transaction(
@@ -351,21 +347,23 @@ class RealWorldTrafficEngine:
         for i in range(1, self.total_txs + 1):
             tx, scenario = self.generate_single_transaction(i)
             scenario_counts[scenario] += 1
-            dataset.append({
-                "case_id": tx.tx_id,
-                "scenario": scenario,
-                "is_fraud": scenario != "ORGANIC_BENIGN",
-                "expected_decision": (
-                    "ALLOW"
-                    if scenario == "ORGANIC_BENIGN"
-                    else "LOCK_ACCOUNT"
-                    if scenario == "ATO_IMPOSSIBLE_TRAVEL"
-                    else "BLOCK_TX"
-                    if scenario == "BSA_STRUCTURING"
-                    else "CHALLENGE_3DS"
-                ),
-                "transaction": tx.model_dump(mode="json"),
-            })
+            dataset.append(
+                {
+                    "case_id": tx.tx_id,
+                    "scenario": scenario,
+                    "is_fraud": scenario != "ORGANIC_BENIGN",
+                    "expected_decision": (
+                        "ALLOW"
+                        if scenario == "ORGANIC_BENIGN"
+                        else "LOCK_ACCOUNT"
+                        if scenario == "ATO_IMPOSSIBLE_TRAVEL"
+                        else "BLOCK_TX"
+                        if scenario == "BSA_STRUCTURING"
+                        else "CHALLENGE_3DS"
+                    ),
+                    "transaction": tx.model_dump(mode="json"),
+                }
+            )
 
         out = Path(output_path)
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -401,16 +399,8 @@ class RealWorldTrafficEngine:
 
         cust = bank_db.get_customer(tx.user_id)
         cust_name = cust.profile.full_name if cust else tx.user_id
-        card_str = (
-            f"Visa ..{cust.cards[0].masked_pan[-4:]}"
-            if (cust and cust.cards)
-            else "N/A"
-        )
-        bal_str = (
-            f"${cust.accounts[0].current_balance:,.0f}"
-            if (cust and cust.accounts)
-            else "N/A"
-        )
+        card_str = f"Visa ..{cust.cards[0].masked_pan[-4:]}" if (cust and cust.cards) else "N/A"
+        bal_str = f"${cust.accounts[0].current_balance:,.0f}" if (cust and cust.accounts) else "N/A"
 
         protection_note = ""
         if decision == "ALLOW":

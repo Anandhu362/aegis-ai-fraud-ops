@@ -122,7 +122,9 @@ class DeviceFootprint(BaseModel):
     user_id: str = Field(pattern=r"^USR_[A-Z0-9]{2,32}$")
     device_model: str = Field(description="Hardware model name")
     user_agent: str = Field(description="Authentic client browser/OS user agent")
-    trusted_ip_subnet: str = Field(description="Customer residential CIDR prefix (e.g. 73.189.42.0/24)")
+    trusted_ip_subnet: str = Field(
+        description="Customer residential CIDR prefix (e.g. 73.189.42.0/24)"
+    )
     isp_name: str = Field(description="Residential internet service provider")
     biometric_enrolled: bool = Field(default=True, description="True if FaceID/TouchID is enabled")
 

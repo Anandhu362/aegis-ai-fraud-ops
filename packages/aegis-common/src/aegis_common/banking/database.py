@@ -840,12 +840,12 @@ class BankingDatabase:
                 email=f"{user_id.lower()}@aegisbank.com",
                 phone=f"+1{random_phone(user_id)}",
                 residential_address=f"{street}, {metro['city']}, {metro['state']} {zip_code}",
-                city=metro["city"],
-                state=metro["state"],
+                city=str(metro["city"]),
+                state=str(metro["state"]),
                 postal_code=zip_code,
                 country="US",
-                home_latitude=metro["lat"],
-                home_longitude=metro["lon"],
+                home_latitude=float(str(metro["lat"])),
+                home_longitude=float(str(metro["lon"])),
                 kyc_status=KycStatus.TIER_3_PASSPORT_VERIFIED,
                 credit_score=720 + (hash(user_id) % 120),
                 risk_tier=CustomerRiskTier.LOW
@@ -859,7 +859,7 @@ class BankingDatabase:
             account = BankAccount(
                 account_number=acc_num,
                 user_id=user_id,
-                routing_number=metro["routing"],
+                routing_number=str(metro["routing"]),
                 account_type=AccountType.CHECKING,
                 current_balance=Decimal(str(round(init_bal, 2))),
                 available_balance=Decimal(str(round(init_bal, 2))),
@@ -889,7 +889,7 @@ class BankingDatabase:
                     f"Mozilla/5.0 ({dev_model}; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15"
                 ),
                 trusted_ip_subnet=f"{metro['ip_prefix']}.0/24",
-                isp_name=metro["isp"],
+                isp_name=str(metro["isp"]),
                 biometric_enrolled=True,
             )
 
@@ -1005,7 +1005,7 @@ class BankingDatabase:
             return True
 
     def reset_all(self) -> int:
-        """Reset all customer profiles, balances, cards, and past transaction history to clean state."""
+        """Reset all customer profiles, balances, cards, and transaction history to clean state."""
         with self._data_lock:
             self._initialize_records()
             return len(self._customers)

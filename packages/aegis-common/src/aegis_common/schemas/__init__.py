@@ -1,5 +1,18 @@
 """Exported schemas for Aegis AI Fraud Ops."""
 
+from aegis_common.schemas.banking import (
+    AccountStatus,
+    AccountType,
+    BankAccount,
+    BankingCustomerRecord,
+    CardBrand,
+    CardStatus,
+    CustomerProfile,
+    CustomerRiskTier,
+    DeviceFootprint,
+    KycStatus,
+    PaymentCard,
+)
 from aegis_common.schemas.enums import (
     HIGH_RISK_MERCHANT_CATEGORIES,
     AgentName,
@@ -22,19 +35,6 @@ from aegis_common.schemas.features import (
     TravelCheck,
     UserBaseline,
     VelocityStats,
-)
-from aegis_common.schemas.banking import (
-    AccountStatus,
-    AccountType,
-    BankAccount,
-    BankingCustomerRecord,
-    CardBrand,
-    CardStatus,
-    CustomerProfile,
-    CustomerRiskTier,
-    DeviceFootprint,
-    KycStatus,
-    PaymentCard,
 )
 from aegis_common.schemas.telemetry import TelemetryEvent
 from aegis_common.schemas.transaction import Location, Transaction

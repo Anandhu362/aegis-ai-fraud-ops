@@ -71,9 +71,21 @@ async def get_active_policies() -> PolicyGuardrails:
         },
         action_matrix=[
             {"decision": "ALLOW", "trigger": "Score < 30", "friction": "Zero Customer Friction"},
-            {"decision": "CHALLENGE_3DS", "trigger": "Score 30-69 or Novel Device", "friction": "One-Time Passcode"},
-            {"decision": "BLOCK_TX", "trigger": "Score >= 70 or Velocity Burst", "friction": "Transaction Declined"},
-            {"decision": "LOCK_ACCOUNT", "trigger": "Score >= 85 and 2+ Vectors", "friction": "Account Frozen"},
+            {
+                "decision": "CHALLENGE_3DS",
+                "trigger": "Score 30-69 or Novel Device",
+                "friction": "One-Time Passcode",
+            },
+            {
+                "decision": "BLOCK_TX",
+                "trigger": "Score >= 70 or Velocity Burst",
+                "friction": "Transaction Declined",
+            },
+            {
+                "decision": "LOCK_ACCOUNT",
+                "trigger": "Score >= 85 and 2+ Vectors",
+                "friction": "Account Frozen",
+            },
         ],
         rate_limits={
             "global_ingestion_limit_rpm": 60,

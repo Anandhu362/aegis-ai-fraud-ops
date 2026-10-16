@@ -9,17 +9,21 @@ Populates Firestore collections:
 
 import os
 import sys
-from google.cloud import firestore
+
+from aegis_common.banking import bank_db
 from dotenv import load_dotenv
+from google.cloud import firestore
 
 load_dotenv()
 
-from aegis_common.banking import bank_db
+BATCH_LIMIT: int = 400
 
 
 def seed_banking_firestore() -> None:
     """Write all banking database records into Google Cloud Firestore Native collections."""
-    project_id = os.getenv("GCP_PROJECT") or os.getenv("GOOGLE_CLOUD_PROJECT") or "aegis-fraud-ops-2026"
+    project_id = (
+        os.getenv("GCP_PROJECT") or os.getenv("GOOGLE_CLOUD_PROJECT") or "aegis-fraud-ops-2026"
+    )
     print(f"[*] Connecting to Google Cloud Firestore (Project: {project_id})...")
 
     try:
@@ -110,8 +114,8 @@ def seed_banking_firestore() -> None:
         batch.set(base_ref, base_data, merge=True)
         batch_count += 1
 
-        # Commit batch every 400 operations (Firestore 500 limit)
-        if batch_count >= 400:
+        # Commit batch every BATCH_LIMIT operations (Firestore 500 limit)
+        if batch_count >= BATCH_LIMIT:
             batch.commit()
             total_written += batch_count
             print(f"    [+] Committed {total_written} documents to Firestore...")
