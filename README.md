@@ -12,6 +12,7 @@
 
 > **Submission for Google Cloud AI Builder Cup 2026**  
 > **Track:** Banking, Financial Services & Insurance (BFSI) — *Intelligent Risk, Fraud & Financial Experiences*  
+> **Live Production Dashboard:** [https://aegis-fraud-ops-2026.web.app](https://aegis-fraud-ops-2026.web.app)  
 > **Repository:** [https://github.com/Anandhu362/aegis-ai-fraud-ops](https://github.com/Anandhu362/aegis-ai-fraud-ops)
 
 ---
@@ -276,9 +277,9 @@ InvestigationPipeline                   (SequentialAgent)
 
 #### 4. Deterministic Policy Engine (`PolicyAgent`)
 - **Hard Rule Floors (Cannot be overridden by AI):**
-  - **Rule $H_1$ (Tor Exit + Impossible Travel):** $\text{Score} = \max(\text{score}, 90) \implies \text{LOCK\_ACCOUNT}$.
-  - **Rule $H_2$ (Structuring Hit):** $\text{Score} = \max(\text{score}, 72) \implies \text{BLOCK\_TX}$.
-  - **Rule $H_3$ (Account Pre-Locked):** Instant $\text{DECLINE\_LOCKED}$ without model invocation.
+  - **Rule $H_1$ (Tor Exit + Impossible Travel):** $\text{Score} = \max(\text{score}, 90) \implies$ `LOCK_ACCOUNT`.
+  - **Rule $H_2$ (Structuring Hit):** $\text{Score} = \max(\text{score}, 72) \implies$ `BLOCK_TX`.
+  - **Rule $H_3$ (Account Pre-Locked):** Instant `DECLINE_LOCKED` without model invocation.
 - **Action Actuator:** Only `PolicyAgent` can invoke `execute_account_lockout` and `block_transaction`. Actuator tools are **never exposed to LLMs**.
 
 ---
@@ -484,47 +485,111 @@ npm run dev
 
 ## 9. Interactive Walkthrough & Live Demo Scenarios
 
-Once running, access the dashboard at **`http://localhost:5173/`**.
+### 9.1 Accessing the Platform
 
-### 9.1 Demo Credentials
+Reviewers and judges can evaluate the system immediately with zero setup via the public cloud deployment, or run it locally:
+
+| Environment | Access URL | Infrastructure |
+|---|---|---|
+| **🌐 Production Cloud SOC** | **[https://aegis-fraud-ops-2026.web.app](https://aegis-fraud-ops-2026.web.app)** | Google Cloud Run (`us-central1`) + Firebase Hosting |
+| **💻 Local Workspace** | **`http://localhost:5173/`** | Local Vite Dev Server + FastAPI Gateway |
+
+---
+
+### 9.2 Institutional Authentication & RBAC
 
 | Field | Demo Value | Resolved Security Context |
 |---|---|---|
 | **Email** | `demo@aegis.com` | **Anandhu** (`ANL_ANANDHU_01`) |
 | **Password** | `password` | Role: **L2 Senior Fraud Ops** (Full Override & Actuation Authority) |
 
-*(A convenient **"Pre-fill Authorized Analyst"** button is built into the login screen for instant one-click demonstration).*
+> 💡 **Quick Access:** Click the built-in **"Pre-fill Authorized Analyst"** button on the login screen to populate credentials and issue a signed RFC 7519 HMAC-SHA256 JWT in 1 click.
 
 ---
 
-### 9.2 Key Live Demonstration Scenarios
+### 9.3 In-Dashboard Interactive Simulation Bar
 
-To feed realistic transactions through the preloaded banking channels, execute in a separate terminal:
-```powershell
-.\stream_traffic.ps1
+The Midnight SOC dashboard features an embedded **Simulation Control Ribbon** at the top of the interface, allowing judges to evaluate multi-agent reasoning, fast-path triage, and autonomous containment directly in the browser without touching a terminal:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  🟢 PRELOADED CORE BANKING CHANNELS & SURVEILLANCE RAILS              [ ▶ Start Live Stream ]  [ ⚡ Populate Demo Cases ] │
+├─────────────────────────────────────────┬──────────────────────────────────────────┬───────────────────────────────────┤
+│  💳 Channel 1: Retail POS & Card Clear  │  🏛️ Channel 2: Fedwire & RTP Velocity    │  🌐 Channel 3: Cross-Border Geo   │
+│  • $4.50 Coffee Shop Spend              │  • $9,800 Structuring BSA Burst          │  • $12,500 Impossible Travel ATO  │
+│  • Tag: [ FAST-PATH ]                   │  • Tag: [ RULE H2 ]                      │  • Tag: [ RULE H1 ]               │
+│  • Latency: < 500ms ($0 LLM Compute)    │  • Action: BLOCK_TX (Score 72+)          │  • Action: LOCK_ACCOUNT (Score 90+)│
+└─────────────────────────────────────────┴──────────────────────────────────────────┴───────────────────────────────────┘
 ```
 
-Observe the live adjudication of the three benchmark scenarios:
+#### 🎛️ Live Demonstration Controls
 
-#### Scenario 1: Routine Retail POS Purchase (Fast-Path Triage)
+1. **`▶ Start Live Stream` / `⏸ Pause Live Stream` (4.5s Interval):**
+   - Initiates an automated, continuous feed of realistic incoming retail and high-risk banking transactions directly from the browser.
+   - **Scale-to-Zero Cold Start Pacing:** Uses non-overlapping sequential async cycling (4.5s post-completion delay) to guarantee zero request pileup while Cloud Run containers scale.
+   - **Customer Account Rotation:** Dynamically rotates routine retail transactions across diverse customer profiles (`USR_MARCUS712`, `USR_EMMA102`, `USR_LIAM405`, `USR_SOPHIA209`, `USR_NOAH881`), demonstrating mixed traffic where clean purchases clear the sub-second fast path and malicious bursts trigger AI investigation.
+   - **Live Telemetry Stream:** Populates live glass-box agent chat logs, threat dials, risk scores, and BigQuery/Firestore records in real time.
+
+2. **`⚡ Populate Demo Cases`:**
+   - Instantly injects the 3 verified foundational benchmark cases into the feed for immediate case inspection:
+     1. Benign everyday POS coffee purchase.
+     2. BSA structuring velocity burst.
+     3. Tor exit node impossible travel ATO.
+
+3. **`🧹 Clear Feed & Reset`:**
+   - Flushes cached investigations from the hot-cache and resets real-time operational counters to clean zero.
+
+---
+
+### 9.4 The Three Foundational Benchmark Scenarios
+
+Judges can click any of the 3 banking channel cards on the dashboard or trigger them via REST API:
+
+#### ☕ Scenario 1: Routine Retail POS Purchase (Fast-Path Triage)
+- **Banking Channel:** Retail POS & Card Clearing (`FAST-PATH`)
 - **Transaction:** `$4.50` at *Sightglass Coffee* in San Francisco (home city).
 - **Signals:** $Z$-Score: `-0.42`, Known Device, Residential ISP, Zero velocity anomaly.
-- **System Adjudication:** `TriageGate` evaluates heuristic flags in **32ms** and grants `FAST_ALLOW`. LLM inference is completely bypassed, preserving bank compute budget and clearing the card switch inline SLA.
+- **System Adjudication:** `TriageGate` evaluates heuristic flags in **32ms** and grants `ALLOW`. LLM inference is completely bypassed, preserving bank compute budget and clearing the card switch inline SLA (< 700ms).
+- **API Trigger:**
+  ```bash
+  curl -X POST https://aegis-fraud-ops-2026.web.app/v1/simulations/coffee
+  ```
 
-#### Scenario 2: Multi-Vector Impossible Travel Account Takeover (Autonomous Containment)
+#### 💸 Scenario 2: Fedwire BSA Structuring & Velocity Burst (Rule $H_2$)
+- **Banking Channel:** Fedwire & RTP Velocity Surveillance (`RULE H2`)
+- **Transaction:** `$9,800.00` rapid transfer just under the $10,000 CTR/BSA reporting threshold.
+- **Signals:** Structuring pattern detected, high velocity count ($N \ge 5$ within 60s), elevated monetary deviation.
+- **System Adjudication:** 
+  1. Escalates to Google ADK `ParallelAgent` (`BehavioralAnalyst` and `ThreatIntel`).
+  2. Orchestrator synthesizes findings and applies bounded score adjustment ($\Delta \in [-10, +10]$).
+  3. `PolicyAgent` triggers **Hard Rule $H_2$**, establishing a risk floor of 72 and autonomously issuing **`BLOCK_TX`**.
+- **API Trigger:**
+  ```bash
+  curl -X POST https://aegis-fraud-ops-2026.web.app/v1/simulations/smurfing
+  ```
+
+#### 🚨 Scenario 3: Tor Exit Impossible Travel Account Takeover (Rule $H_1$)
+- **Banking Channel:** Cross-Border & Geo-Firewall (`RULE H1`)
 - **Transaction:** `$13,061.79` at *Apex Global Crypto* from London.
 - **Signals:** Swiped 12 minutes after a Dubai ATM withdrawal ($v = 12,850\text{ km/h}$ over Tor Exit Node).
 - **System Adjudication:** 
   1. `ThreatIntelAgent` calculates Haversine speed exceeding $800\text{ km/h}$ and flags high-abuse Tor routing.
   2. `BehavioralAnalystAgent` flags category novelty (crypto exchange) and extreme monetary anomaly ($Z = 4.82$).
-  3. `OrchestratorAgent` correlates vectors into an attack narrative.
-  4. `PolicyAgent` triggers **Hard Rule $H_1$**, locking the score at $100/100$ and autonomously executing **`LOCK_ACCOUNT`** on the core ledger within **11.9 seconds**.
+  3. `OrchestratorAgent` correlates multi-vector evidence into a structured investigation report.
+  4. `PolicyAgent` triggers **Hard Rule $H_1$**, locking the threat score at $100/100$ and autonomously executing **`LOCK_ACCOUNT`** on the core banking ledger.
+- **API Trigger:**
+  ```bash
+  curl -X POST https://aegis-fraud-ops-2026.web.app/v1/simulations/tor_travel
+  ```
 
-#### Scenario 3: The False-Positive Savior (Multi-Agent Context Correlation)
-- **Transaction:** `TX_LIVED203870044` for user `USR_NOAH719`.
-- **Signals:** High monetary value ($Z\text{-score} = 3.63$, $> P95$) and unverified hardware device.
-- **Traditional Rule Engine Outcome:** **FALSE DECLINE**. A legacy bank declines the card, frustrating an affluent customer.
-- **Aegis Outcome:** Gemini agents correlate the high amount with a clean residential ISP, zero velocity burst, and matching home location, returning an **`ALLOW` (Score 30/100)** verdict. Legitimate commerce is protected.
+---
+
+### 9.5 Alternative Terminal Traffic Generator
+
+If preferred, transactions can also be streamed from the command line using the included PowerShell script:
+```powershell
+.\stream_traffic.ps1
+```
 
 ---
 
@@ -547,9 +612,11 @@ gcloud run deploy aegis-api-gateway \
   --region us-central1 \
   --allow-unauthenticated \
   --set-secrets JWT_SECRET=aegis-jwt-secret:latest,AEGIS_API_KEYS=aegis-api-keys:latest \
-  --min-instances 1 \
+  --min-instances 0 \
   --memory 512Mi
 ```
+
+> 💡 **Cost Efficiency & Cold-Start Balancing:** During prototyping and hackathon evaluation, services are configured with `--min-instances 0` to achieve **$0 idle cloud spend**. Aegis includes tiered connection pooling and retry loops (`fetchWithRetry` in React and `HttpInvestigationDispatcher` in FastAPI) to ride through scale-to-zero container spin-ups transparently without throwing 502 errors. For high-volume enterprise production, `--min-instances 1+` provides continuous warm latency.
 
 ---
 
