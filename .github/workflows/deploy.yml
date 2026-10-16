@@ -290,6 +290,12 @@ jobs:
 
           # 3. Deploy API Gateway (Public with Secret Manager for JWT)
           if [ "${{ needs.detect-changes.outputs.gateway }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🚀 Fetching dynamic Cloud Run URLs for internal microservices..."
+            ENGINE_URL=$(gcloud run services describe aegis-agent-engine --region ${{ env.GCP_REGION }} --format='value(status.url)')
+            ACTUATOR_URL=$(gcloud run services describe aegis-actuator --region ${{ env.GCP_REGION }} --format='value(status.url)')
+            echo "Agent Engine URL: $ENGINE_URL"
+            echo "Actuator URL: $ACTUATOR_URL"
+
             echo "🚀 Deploying API Gateway revision (green)..."
             gcloud run deploy aegis-api-gateway \
               --image $REGISTRY/api-gateway:$COMMIT_SHA \
@@ -297,7 +303,7 @@ jobs:
               --ingress all \
               --allow-unauthenticated \
               --set-secrets JWT_SECRET=aegis-jwt-secret:latest,AEGIS_API_KEYS=aegis-api-keys:latest \
-              --set-env-vars AEGIS_ENV=demo,AEGIS_ADAPTER_MODE=gcp,GCP_PROJECT=${{ env.GCP_PROJECT }},AEGIS_ENGINE_URL=https://aegis-agent-engine-220013375925.us-central1.run.app,AEGIS_ACTUATOR_URL=https://aegis-actuator-220013375925.us-central1.run.app \
+              --set-env-vars AEGIS_ENV=demo,AEGIS_ADAPTER_MODE=gcp,GCP_PROJECT=${{ env.GCP_PROJECT }},AEGIS_ENGINE_URL=$ENGINE_URL,AEGIS_ACTUATOR_URL=$ACTUATOR_URL \
               --tag green \
               --no-traffic
           fi
