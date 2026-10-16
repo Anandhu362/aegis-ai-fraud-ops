@@ -7,6 +7,7 @@ from collections.abc import AsyncIterator
 
 import hashlib
 import time
+import uuid
 from datetime import UTC, datetime, timedelta
 
 from aegis_common.banking import bank_db
@@ -380,16 +381,21 @@ class GatewayService:
         self,
         scenario: str,
         mode: str = "sync",
+        tx_id: str | None = None,
     ) -> Verdict | dict[str, str]:
         """Generate pre-configured attack simulation and execute analysis."""
         scenario_key = scenario.lower().strip()
+        seq_suffix = uuid.uuid4().hex[:6].upper()
         match scenario_key:
             case "coffee" | "clean_coffee":
-                tx = create_clean_coffee_scenario()
+                target_id = tx_id or f"TX_COFFEE_{seq_suffix}"
+                tx = create_clean_coffee_scenario(tx_id=target_id)
             case "smurfing" | "structuring":
-                tx = create_smurfing_scenario()
+                target_id = tx_id or f"TX_SMURF_{seq_suffix}"
+                tx = create_smurfing_scenario(tx_id=target_id)
             case "tor_travel" | "tor_ato" | "impossible_travel":
-                tx = create_tor_travel_scenario()
+                target_id = tx_id or f"TX_ATO_{seq_suffix}"
+                tx = create_tor_travel_scenario(tx_id=target_id)
             case _:
                 raise ValidationError(
                     f"Unknown simulation scenario: {scenario}",

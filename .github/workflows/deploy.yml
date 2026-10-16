@@ -269,6 +269,7 @@ jobs:
               --region ${{ env.GCP_REGION }} \
               --ingress all \
               --allow-unauthenticated \
+              --set-env-vars AEGIS_ADAPTER_MODE=gcp,AEGIS_ENV=demo,GCP_PROJECT=${{ env.GCP_PROJECT }} \
               --tag green \
               --no-traffic
           fi
@@ -282,7 +283,7 @@ jobs:
               --ingress all \
               --allow-unauthenticated \
               --set-secrets GEMINI_API_KEY=aegis-gemini-api-key:latest \
-              --set-env-vars AEGIS_ADAPTER_MODE=gcp,AEGIS_ENV=demo \
+              --set-env-vars AEGIS_ADAPTER_MODE=gcp,AEGIS_ENV=demo,GCP_PROJECT=${{ env.GCP_PROJECT }} \
               --tag green \
               --no-traffic
           fi
@@ -296,7 +297,7 @@ jobs:
               --ingress all \
               --allow-unauthenticated \
               --set-secrets JWT_SECRET=aegis-jwt-secret:latest,AEGIS_API_KEYS=aegis-api-keys:latest \
-              --set-env-vars AEGIS_ENV=demo,AEGIS_ADAPTER_MODE=gcp,AEGIS_ENGINE_URL=https://aegis-agent-engine-220013375925.us-central1.run.app,AEGIS_ACTUATOR_URL=https://aegis-actuator-220013375925.us-central1.run.app \
+              --set-env-vars AEGIS_ENV=demo,AEGIS_ADAPTER_MODE=gcp,GCP_PROJECT=${{ env.GCP_PROJECT }},AEGIS_ENGINE_URL=https://aegis-agent-engine-220013375925.us-central1.run.app,AEGIS_ACTUATOR_URL=https://aegis-actuator-220013375925.us-central1.run.app \
               --tag green \
               --no-traffic
           fi

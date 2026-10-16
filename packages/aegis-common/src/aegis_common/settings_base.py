@@ -12,12 +12,24 @@ class AegisBaseSettings(BaseSettings):
         extra="ignore",
     )
 
-    gcp_project: str = "aegis-fraud-ops-dev"
+    gcp_project: str = "aegis-fraud-ops-2026"
     aegis_env: str = "local"
     aegis_adapter_mode: str = "mock"  # mock | gcp
     aegis_log_level: str = "INFO"
     gemini_api_key: str | None = None
     google_maps_api_key: str | None = None
+
+    @property
+    def clean_gemini_api_key(self) -> str | None:
+        """Return clean Gemini API key free of whitespace or encoded artifacts."""
+        key = self.gemini_api_key
+        if not key:
+            return None
+        val = key.strip()
+        parts = val.split()
+        if len(parts) > 1 and all(p.isdigit() for p in parts):
+            return "".join(chr(int(p)) for p in parts)
+        return val
 
     @property
     def is_mock_mode(self) -> bool:

@@ -21,8 +21,9 @@ async def trigger_simulation(
     service: Annotated[GatewayService, Depends(get_gateway_service)],
     _caller: Annotated[str, Depends(verify_auth_or_mock)],
     mode: str = Query(default="sync", description="Execution mode: 'sync' or 'async'"),
+    tx_id: str | None = Query(default=None, description="Optional custom transaction ID"),
 ) -> Verdict | dict[str, str]:
     """Trigger predefined fraud attack scenarios: 'coffee' (fast-path),
     'smurfing' (structuring), or 'tor_travel' (impossible travel ATO).
     """
-    return await service.trigger_simulation_scenario(scenario=scenario, mode=mode)
+    return await service.trigger_simulation_scenario(scenario=scenario, mode=mode, tx_id=tx_id)

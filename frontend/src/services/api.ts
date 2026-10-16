@@ -235,15 +235,16 @@ export const api = {
    */
   async triggerSimulation(
     scenario: string,
-    mode: "sync" | "async" = "sync"
+    mode: "sync" | "async" = "sync",
+    txId?: string
   ): Promise<Verdict> {
-    const res = await fetch(
-      `${BASE_URL}/v1/simulations/${scenario}?mode=${mode}`,
-      {
-        method: "POST",
-        headers: getAuthHeaders(),
-      }
-    );
+    const url = txId
+      ? `${BASE_URL}/v1/simulations/${scenario}?mode=${mode}&tx_id=${encodeURIComponent(txId)}`
+      : `${BASE_URL}/v1/simulations/${scenario}?mode=${mode}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: getAuthHeaders(),
+    });
     return handleResponse<Verdict>(res);
   },
 

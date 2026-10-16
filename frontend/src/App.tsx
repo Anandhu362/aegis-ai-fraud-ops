@@ -175,6 +175,24 @@ export function App(): React.JSX.Element {
         const v = res as Verdict;
         setSelectedTxId(v.tx_id);
         setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
+        setMetrics((prev) => {
+          const isAllow = v.decision === "ALLOW";
+          const isBlock = v.decision === "BLOCK_TX";
+          const isLock =
+            v.decision === "LOCK_ACCOUNT" ||
+            v.decision === "DECLINE_LOCKED";
+          const isReview = v.decision === "REVIEW";
+          return {
+            ...prev,
+            processed_count: prev.processed_count + 1,
+            allowed_count: isAllow ? prev.allowed_count + 1 : prev.allowed_count,
+            blocked_count: isBlock ? prev.blocked_count + 1 : prev.blocked_count,
+            locked_count: isLock ? prev.locked_count + 1 : prev.locked_count,
+            review_count: isReview ? prev.review_count + 1 : prev.review_count,
+            clean_count: isAllow ? prev.clean_count + 1 : prev.clean_count,
+            total_tokens_consumed: prev.total_tokens_consumed + 374,
+          };
+        });
       }
     } catch (err) {
       console.error("Failed to trigger simulation scenario", err);
@@ -187,16 +205,22 @@ export function App(): React.JSX.Element {
   const handlePopulateDemoData = async () => {
     try {
       setPopulating(true);
-      await api.triggerSimulation("coffee", "sync");
+      await api.triggerSimulation("coffee", "sync", "TX_COFFEE001");
       await new Promise((resolve) => setTimeout(resolve, 350));
-      await api.triggerSimulation("smurfing", "sync");
+      await api.triggerSimulation("smurfing", "sync", "TX_SMURF001");
       await new Promise((resolve) => setTimeout(resolve, 350));
-      const ato = await api.triggerSimulation("tor_travel", "sync");
+      const ato = await api.triggerSimulation("tor_travel", "sync", "TX_ATO001");
       if (ato && "tx_id" in ato) {
         const v = ato as Verdict;
         setSelectedTxId(v.tx_id);
-        setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
       }
+      // Refresh case list & metrics from gateway hot-cache
+      const [latestCases, latestMetrics] = await Promise.all([
+        api.listInvestigations(50),
+        api.getMetricsSummary(),
+      ]);
+      if (latestCases) setCases(latestCases);
+      if (latestMetrics) setMetrics(latestMetrics);
     } catch (err) {
       console.error("Failed to populate demo cases", err);
     } finally {
@@ -230,6 +254,24 @@ export function App(): React.JSX.Element {
           const v = res as Verdict;
           setSelectedTxId(v.tx_id);
           setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
+          setMetrics((prev) => {
+            const isAllow = v.decision === "ALLOW";
+            const isBlock = v.decision === "BLOCK_TX";
+            const isLock =
+              v.decision === "LOCK_ACCOUNT" ||
+              v.decision === "DECLINE_LOCKED";
+            const isReview = v.decision === "REVIEW";
+            return {
+              ...prev,
+              processed_count: prev.processed_count + 1,
+              allowed_count: isAllow ? prev.allowed_count + 1 : prev.allowed_count,
+              blocked_count: isBlock ? prev.blocked_count + 1 : prev.blocked_count,
+              locked_count: isLock ? prev.locked_count + 1 : prev.locked_count,
+              review_count: isReview ? prev.review_count + 1 : prev.review_count,
+              clean_count: isAllow ? prev.clean_count + 1 : prev.clean_count,
+              total_tokens_consumed: prev.total_tokens_consumed + 374,
+            };
+          });
         }
       } catch (err) {
         console.warn("Live stream transaction transient delay:", err);

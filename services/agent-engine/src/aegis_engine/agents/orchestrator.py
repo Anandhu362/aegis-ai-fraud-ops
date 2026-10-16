@@ -138,7 +138,13 @@ class OrchestratorAgent(BaseAgent):
         assessment: OrchestratorAssessment | None = None
 
         # Live Gemini LLM synthesis if configured and not in offline mock mode
-        api_key = self._settings.gemini_api_key or os.environ.get("GEMINI_API_KEY")
+        api_key = (
+            self._settings.clean_gemini_api_key or os.environ.get("GEMINI_API_KEY", "").strip()
+        )
+        if api_key and "\n" in api_key:
+            parts = api_key.split()
+            if len(parts) > 1 and all(p.isdigit() for p in parts):
+                api_key = "".join(chr(int(p)) for p in parts)
         if not self._settings.is_mock_mode and api_key:
             try:
                 client = genai.Client(api_key=api_key)
