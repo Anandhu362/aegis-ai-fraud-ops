@@ -119,6 +119,7 @@ export function getStoredProfile(): AnalystProfile | null {
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    "X-API-Key": "aegis-secret-key",
   };
   const token = getStoredToken();
   if (token) {
