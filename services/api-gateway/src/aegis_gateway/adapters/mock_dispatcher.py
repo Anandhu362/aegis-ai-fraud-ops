@@ -1,19 +1,25 @@
 """Mock dispatcher executing InvestigationService directly in-process for standalone testing."""
 
 import asyncio
+from typing import Any
 
 from aegis_common.schemas.transaction import Transaction
 from aegis_common.schemas.verdict import Verdict
-from aegis_engine.bootstrap import build_engine
-from aegis_engine.settings import EngineSettings
 
 
 class MockInvestigationDispatcher:
     """In-process dispatcher executing the ADK pipeline without network hops."""
 
-    def __init__(self, settings: EngineSettings | None = None) -> None:
-        engine_settings = settings or EngineSettings()
-        self.container = build_engine(engine_settings)
+    def __init__(self, settings: Any = None) -> None:
+        try:
+            from aegis_engine.bootstrap import build_engine  # noqa: PLC0415
+            from aegis_engine.settings import EngineSettings  # noqa: PLC0415
+
+            engine_settings = settings or EngineSettings()
+            self.container = build_engine(engine_settings)
+        except ImportError as exc:
+            msg = "MockInvestigationDispatcher requires aegis-engine package."
+            raise RuntimeError(msg) from exc
         self._background_tasks: set[asyncio.Task[Verdict]] = set()
 
     async def dispatch_sync(self, tx: Transaction) -> Verdict:

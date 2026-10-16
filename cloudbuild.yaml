@@ -1,0 +1,39 @@
+steps:
+  # 1. Build Actuator
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'services/actuator/Dockerfile'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/aegis/actuator:latest'
+      - '.'
+
+  # 2. Build Agent Engine
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'services/agent-engine/Dockerfile'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/aegis/agent-engine:latest'
+      - '.'
+
+  # 3. Build API Gateway
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'services/api-gateway/Dockerfile'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/aegis/api-gateway:latest'
+      - '.'
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/aegis/actuator:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/aegis/agent-engine:latest'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/aegis/api-gateway:latest'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY

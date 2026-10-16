@@ -20,7 +20,7 @@ COPY packages/ packages/
 COPY services/api-gateway/ services/api-gateway/
 
 # Install gateway dependencies into isolated virtualenv
-RUN uv sync --frozen --no-dev --package aegis-gateway
+RUN uv sync --no-dev --package aegis-gateway
 
 # ------------------------------------------------------------------------------
 # Stage 2: Minimal runtime image

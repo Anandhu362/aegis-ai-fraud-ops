@@ -18,7 +18,7 @@ COPY packages/ packages/
 COPY services/agent-engine/ services/agent-engine/
 
 # Install engine dependencies into isolated virtualenv
-RUN uv sync --frozen --no-dev --package aegis-engine
+RUN uv sync --no-dev --package aegis-engine
 
 # ------------------------------------------------------------------------------
 # Stage 2: Minimal runtime image
@@ -37,10 +37,10 @@ COPY --chown=aegis:aegis config/ /app/config/
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8090
+    PORT=8080
 
 USER aegis
 
-EXPOSE 8090
+EXPOSE 8080
 
-CMD exec uvicorn aegis_engine.main:app --host 0.0.0.0 --port ${PORT:-8090} --no-access-log
+CMD exec uvicorn aegis_engine.main:app --host 0.0.0.0 --port ${PORT:-8080} --no-access-log

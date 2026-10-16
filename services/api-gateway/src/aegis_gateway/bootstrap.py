@@ -3,7 +3,6 @@
 from aegis_gateway.adapters.firestore_case_repo import FirestoreCaseRepository
 from aegis_gateway.adapters.http_dispatcher import HttpInvestigationDispatcher
 from aegis_gateway.adapters.in_memory_case_repo import InMemoryCaseRepository
-from aegis_gateway.adapters.mock_dispatcher import MockInvestigationDispatcher
 from aegis_gateway.application.gateway_service import GatewayService
 from aegis_gateway.ports.case_repo import CaseRepositoryPort
 from aegis_gateway.ports.dispatcher import InvestigationDispatcherPort
@@ -23,6 +22,10 @@ def build_gateway_service(settings: GatewaySettings) -> GatewayService:
     dispatcher: InvestigationDispatcherPort
 
     if settings.is_mock_mode:
+        from aegis_gateway.adapters.mock_dispatcher import (  # noqa: PLC0415
+            MockInvestigationDispatcher,
+        )
+
         case_repo = InMemoryCaseRepository()
         dispatcher = MockInvestigationDispatcher()
     else:

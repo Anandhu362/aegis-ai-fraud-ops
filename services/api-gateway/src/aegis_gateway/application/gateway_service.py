@@ -17,8 +17,10 @@ from aegis_common.errors import (
     ValidationError,
 )
 from aegis_common.logging import get_logger
-from aegis_common.schemas.enums import Decision, RiskLevel, Typology
-from aegis_common.schemas.transaction import Transaction
+from decimal import Decimal
+
+from aegis_common.schemas.enums import Channel, Decision, MerchantCategory, RiskLevel, Typology
+from aegis_common.schemas.transaction import Location, Transaction
 from aegis_common.schemas.verdict import (
     ActuatorAction,
     AnalystDecision,
@@ -27,11 +29,74 @@ from aegis_common.schemas.verdict import (
     ScoreBreakdown,
     Verdict,
 )
-from aegis_sim.scenarios import (  # type: ignore[import-untyped]
-    create_clean_coffee_scenario,
-    create_smurfing_scenario,
-    create_tor_travel_scenario,
-)
+
+try:
+    from aegis_sim.scenarios import (  # type: ignore[import-untyped]
+        create_clean_coffee_scenario,
+        create_smurfing_scenario,
+        create_tor_travel_scenario,
+    )
+except ImportError:
+    # Production fallback when aegis_sim workspace package is not installed
+    def create_clean_coffee_scenario(tx_id: str = "TX_COFFEE001") -> Transaction:
+        return Transaction(
+            tx_id=tx_id,
+            user_id="USR_MARCUS712",
+            timestamp=datetime.now(UTC),
+            amount=Decimal("4.50"),
+            currency="USD",
+            merchant="Blue Bottle Coffee",
+            merchant_category=MerchantCategory.COFFEE_SHOP,
+            channel=Channel.CARD_PRESENT,
+            device_id="DEV_MARCUS_IPHONE15",
+            ip_address="73.189.42.11",
+            location=Location(
+                latitude=37.7749,
+                longitude=-122.4194,
+                city="San Francisco",
+                country="US",
+            ),
+        )
+
+    def create_smurfing_scenario(tx_id: str = "TX_SMURF001") -> Transaction:
+        return Transaction(
+            tx_id=tx_id,
+            user_id="USR_SARAH840",
+            timestamp=datetime.now(UTC),
+            amount=Decimal("9800.00"),
+            currency="USD",
+            merchant="Express Money Transfer Systems LLC",
+            merchant_category=MerchantCategory.MONEY_TRANSFER,
+            channel=Channel.ECOMMERCE,
+            device_id="DEV_PROXY_BOT",
+            ip_address="198.51.100.84",
+            location=Location(
+                latitude=40.7128,
+                longitude=-74.0060,
+                city="New York",
+                country="US",
+            ),
+        )
+
+    def create_tor_travel_scenario(tx_id: str = "TX_ATO001") -> Transaction:
+        return Transaction(
+            tx_id=tx_id,
+            user_id="USR_ELENA391",
+            timestamp=datetime.now(UTC),
+            amount=Decimal("12500.00"),
+            currency="USD",
+            merchant="Global Crypto Exchange Inc",
+            merchant_category=MerchantCategory.CRYPTOCURRENCY_BROKERAGE,
+            channel=Channel.ECOMMERCE,
+            device_id="DEV_UNKNOWN_HACKER",
+            ip_address="185.220.101.5",
+            location=Location(
+                latitude=50.1109,
+                longitude=8.6821,
+                city="Frankfurt",
+                country="DE",
+            ),
+        )
 
 from aegis_gateway.ports.case_repo import CaseRepositoryPort
 from aegis_gateway.ports.dispatcher import InvestigationDispatcherPort

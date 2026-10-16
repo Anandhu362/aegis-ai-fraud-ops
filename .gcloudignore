@@ -1,0 +1,35 @@
+.gcloudignore
+.git
+.gitignore
+
+# Virtualenvs & Caches
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+**/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+*.sa.json
+*key.json
+secrets/
+
+# Data
+simulation/data/*.csv
+simulation/data/*.jsonl
+simulation/data/historical_txs.csv
+simulation/data/eval_set_2000.json

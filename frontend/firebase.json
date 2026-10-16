@@ -4,6 +4,13 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
+        "source": "/v1/**",
+        "run": {
+          "serviceId": "aegis-api-gateway",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/api/**",
         "run": {
           "serviceId": "aegis-api-gateway",
