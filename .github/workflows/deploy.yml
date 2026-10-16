@@ -1,14 +1,14 @@
-name: CD - Cloud Run Blue/Green Deployment
+name: CD - Automated Push-to-Deploy (Cloud Run & Firebase)
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
     inputs:
-      target_env:
-        description: "Target deployment environment (dev | demo | prod)"
+      target:
+        description: "Component to deploy (all | frontend | backend | gateway | engine | actuator)"
         required: true
-        default: "demo"
+        default: "all"
 
 env:
   GCP_PROJECT: aegis-fraud-ops-2026
@@ -17,13 +17,61 @@ env:
 
 jobs:
   # ----------------------------------------------------------------------------
+  # Stage 0: Change Detection & Path Classification
+  # ----------------------------------------------------------------------------
+  detect-changes:
+    name: Classify Changed Files & Folders
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      gateway: ${{ steps.filter.outputs.gateway }}
+      engine: ${{ steps.filter.outputs.engine }}
+      actuator: ${{ steps.filter.outputs.actuator }}
+      any_backend: ${{ steps.filter.outputs.gateway == 'true' || steps.filter.outputs.engine == 'true' || steps.filter.outputs.actuator == 'true' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Detect Changed Paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/deploy.yml'
+            gateway:
+              - 'services/api-gateway/**'
+              - 'packages/**'
+              - 'Dockerfile'
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - '.github/workflows/deploy.yml'
+            engine:
+              - 'services/agent-engine/**'
+              - 'packages/**'
+              - 'Dockerfile'
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - '.github/workflows/deploy.yml'
+            actuator:
+              - 'services/actuator/**'
+              - 'packages/**'
+              - 'Dockerfile'
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - '.github/workflows/deploy.yml'
+
+  # ----------------------------------------------------------------------------
   # Stage 1: Quality Gate & Test Verification
   # ----------------------------------------------------------------------------
   preflight-verification:
     name: Preflight Tests & Quality Gate
+    needs: [detect-changes]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
@@ -39,7 +87,7 @@ jobs:
       - name: Verify Code Quality (Ruff & Mypy)
         run: |
           uv run ruff check .
-          uv run mypy --strict packages/ services/
+          uv run mypy --strict packages/ services/ scripts/
 
       - name: Run Pytest Test Suite
         run: uv run pytest -m "not integration and not e2e and not real_llm" --cov
@@ -57,23 +105,80 @@ jobs:
           npm run build
 
   # ----------------------------------------------------------------------------
-  # Stage 2: Build & Push Images to Artifact Registry
+  # Stage 2A: One-Click Frontend Deployment to Firebase Hosting
   # ----------------------------------------------------------------------------
-  build-and-push:
-    name: Build & Push Container Images
-    needs: preflight-verification
+  deploy-frontend:
+    name: Deploy Frontend (Firebase Hosting)
+    needs: [detect-changes, preflight-verification]
+    if: |
+      always() &&
+      needs.preflight-verification.result == 'success' &&
+      (
+        needs.detect-changes.outputs.frontend == 'true' ||
+        github.event_name == 'workflow_dispatch'
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build Production Bundle
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Firebase Hosting
+        working-directory: ./frontend
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
+        run: |
+          echo "🚀 Deploying Frontend bundle to Firebase Hosting..."
+          npx firebase-tools deploy --only hosting --project ${{ env.GCP_PROJECT }} --non-interactive
+          echo "✅ Frontend successfully deployed to https://aegis-fraud-ops-2026.web.app"
+
+  # ----------------------------------------------------------------------------
+  # Stage 2B: Build & Push Images to Artifact Registry (Only Changed Services)
+  # ----------------------------------------------------------------------------
+  build-and-push:
+    name: Build & Push Container Images
+    needs: [detect-changes, preflight-verification]
+    if: |
+      always() &&
+      needs.preflight-verification.result == 'success' &&
+      (
+        needs.detect-changes.outputs.gateway == 'true' ||
+        needs.detect-changes.outputs.engine == 'true' ||
+        needs.detect-changes.outputs.actuator == 'true' ||
+        github.event_name == 'workflow_dispatch'
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           project_id: ${{ env.GCP_PROJECT }}
-          # Recommended: Workload Identity Federation (or credentials_json for hackathon)
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Configure Docker for Artifact Registry
@@ -85,38 +190,63 @@ jobs:
           REGISTRY="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REPO }}"
           
           # 1. API Gateway
-          docker build -f services/api-gateway/Dockerfile \
-            -t $REGISTRY/api-gateway:$COMMIT_SHA \
-            -t $REGISTRY/api-gateway:latest .
-          docker push $REGISTRY/api-gateway:$COMMIT_SHA
-          docker push $REGISTRY/api-gateway:latest
+          if [ "${{ needs.detect-changes.outputs.gateway }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "📦 Building & Pushing API Gateway image..."
+            docker build -f services/api-gateway/Dockerfile \
+              -t $REGISTRY/api-gateway:$COMMIT_SHA \
+              -t $REGISTRY/api-gateway:latest .
+            docker push $REGISTRY/api-gateway:$COMMIT_SHA
+            docker push $REGISTRY/api-gateway:latest
+          else
+            echo "⏭️ Skipping API Gateway (no changes detected)"
+          fi
 
           # 2. Agent Engine
-          docker build -f services/agent-engine/Dockerfile \
-            -t $REGISTRY/agent-engine:$COMMIT_SHA \
-            -t $REGISTRY/agent-engine:latest .
-          docker push $REGISTRY/agent-engine:$COMMIT_SHA
-          docker push $REGISTRY/agent-engine:latest
+          if [ "${{ needs.detect-changes.outputs.engine }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "📦 Building & Pushing Agent Engine image..."
+            docker build -f services/agent-engine/Dockerfile \
+              -t $REGISTRY/agent-engine:$COMMIT_SHA \
+              -t $REGISTRY/agent-engine:latest .
+            docker push $REGISTRY/agent-engine:$COMMIT_SHA
+            docker push $REGISTRY/agent-engine:latest
+          else
+            echo "⏭️ Skipping Agent Engine (no changes detected)"
+          fi
 
           # 3. Actuator
-          docker build -f services/actuator/Dockerfile \
-            -t $REGISTRY/actuator:$COMMIT_SHA \
-            -t $REGISTRY/actuator:latest .
-          docker push $REGISTRY/actuator:$COMMIT_SHA
-          docker push $REGISTRY/actuator:latest
+          if [ "${{ needs.detect-changes.outputs.actuator }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "📦 Building & Pushing Actuator image..."
+            docker build -f services/actuator/Dockerfile \
+              -t $REGISTRY/actuator:$COMMIT_SHA \
+              -t $REGISTRY/actuator:latest .
+            docker push $REGISTRY/actuator:$COMMIT_SHA
+            docker push $REGISTRY/actuator:latest
+          else
+            echo "⏭️ Skipping Actuator (no changes detected)"
+          fi
 
   # ----------------------------------------------------------------------------
   # Stage 3: Blue-Green Canary Deployment & Automated Rollback
   # ----------------------------------------------------------------------------
   blue-green-deploy:
     name: Blue/Green Canary Traffic Shift
-    needs: build-and-push
+    needs: [detect-changes, build-and-push]
+    if: |
+      always() &&
+      needs.build-and-push.result == 'success' &&
+      (
+        needs.detect-changes.outputs.gateway == 'true' ||
+        needs.detect-changes.outputs.engine == 'true' ||
+        needs.detect-changes.outputs.actuator == 'true' ||
+        github.event_name == 'workflow_dispatch'
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -132,51 +262,64 @@ jobs:
           echo "🚀 Deploying revision with tag 'green' (0% live traffic)..."
 
           # 1. Deploy Actuator
-          gcloud run deploy aegis-actuator \
-            --image $REGISTRY/actuator:$COMMIT_SHA \
-            --region ${{ env.GCP_REGION }} \
-            --ingress all \
-            --allow-unauthenticated \
-            --tag green \
-            --no-traffic
+          if [ "${{ needs.detect-changes.outputs.actuator }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🚀 Deploying Actuator revision (green)..."
+            gcloud run deploy aegis-actuator \
+              --image $REGISTRY/actuator:$COMMIT_SHA \
+              --region ${{ env.GCP_REGION }} \
+              --ingress all \
+              --allow-unauthenticated \
+              --tag green \
+              --no-traffic
+          fi
 
           # 2. Deploy Agent Engine (with Secret Manager)
-          gcloud run deploy aegis-agent-engine \
-            --image $REGISTRY/agent-engine:$COMMIT_SHA \
-            --region ${{ env.GCP_REGION }} \
-            --ingress all \
-            --allow-unauthenticated \
-            --set-secrets GEMINI_API_KEY=aegis-gemini-api-key:latest \
-            --set-env-vars AEGIS_ADAPTER_MODE=gcp,AEGIS_ENV=demo \
-            --tag green \
-            --no-traffic
+          if [ "${{ needs.detect-changes.outputs.engine }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🚀 Deploying Agent Engine revision (green)..."
+            gcloud run deploy aegis-agent-engine \
+              --image $REGISTRY/agent-engine:$COMMIT_SHA \
+              --region ${{ env.GCP_REGION }} \
+              --ingress all \
+              --allow-unauthenticated \
+              --set-secrets GEMINI_API_KEY=aegis-gemini-api-key:latest \
+              --set-env-vars AEGIS_ADAPTER_MODE=gcp,AEGIS_ENV=demo \
+              --tag green \
+              --no-traffic
+          fi
 
           # 3. Deploy API Gateway (Public with Secret Manager for JWT)
-          gcloud run deploy aegis-api-gateway \
-            --image $REGISTRY/api-gateway:$COMMIT_SHA \
-            --region ${{ env.GCP_REGION }} \
-            --allow-unauthenticated \
-            --set-secrets JWT_SECRET=aegis-jwt-secret:latest,AEGIS_API_KEYS=aegis-api-keys:latest \
-            --set-env-vars AEGIS_ENV=demo,AEGIS_ADAPTER_MODE=gcp,AEGIS_ENGINE_URL=https://aegis-agent-engine-220013375925.us-central1.run.app,AEGIS_ACTUATOR_URL=https://aegis-actuator-220013375925.us-central1.run.app \
-            --tag green \
-            --no-traffic
+          if [ "${{ needs.detect-changes.outputs.gateway }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🚀 Deploying API Gateway revision (green)..."
+            gcloud run deploy aegis-api-gateway \
+              --image $REGISTRY/api-gateway:$COMMIT_SHA \
+              --region ${{ env.GCP_REGION }} \
+              --ingress all \
+              --allow-unauthenticated \
+              --set-secrets JWT_SECRET=aegis-jwt-secret:latest,AEGIS_API_KEYS=aegis-api-keys:latest \
+              --set-env-vars AEGIS_ENV=demo,AEGIS_ADAPTER_MODE=gcp,AEGIS_ENGINE_URL=https://aegis-agent-engine-220013375925.us-central1.run.app,AEGIS_ACTUATOR_URL=https://aegis-actuator-220013375925.us-central1.run.app \
+              --tag green \
+              --no-traffic
+          fi
 
       - name: Execute Live Smoke Tests & Health Probes Against Green Revision
         id: smoke_tests
         run: |
-          echo "🔍 Fetching Green Tagged URL for verification..."
-          GATEWAY_URL=$(gcloud run services describe aegis-api-gateway \
-            --region ${{ env.GCP_REGION }} \
-            --format='value(status.traffic[0].url)')
+          echo "🔍 Fetching Target URL for verification..."
           
-          # Format for tagged revision: https://green---<service>-<hash>.a.run.app
+          # Check Green Tag URL for Gateway
           GREEN_URL=$(gcloud run services describe aegis-api-gateway \
             --region ${{ env.GCP_REGION }} \
-            --format='json' | jq -r '.status.traffic[] | select(.tag=="green") | .url')
+            --format='json' | jq -r '.status.traffic[]? | select(.tag=="green") | .url')
 
-          echo "Targeting Green URL: $GREEN_URL"
+          if [ -z "$GREEN_URL" ] || [ "$GREEN_URL" == "null" ]; then
+            GREEN_URL=$(gcloud run services describe aegis-api-gateway \
+              --region ${{ env.GCP_REGION }} \
+              --format='value(status.url)')
+          fi
 
-          # Test 1: Health Probe
+          echo "Targeting Gateway URL: $GREEN_URL"
+
+          # Probe 1: Health Probe
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$GREEN_URL/v1/health")
           if [ "$HTTP_STATUS" != "200" ]; then
             echo "❌ Health check failed with status $HTTP_STATUS"
@@ -184,7 +327,7 @@ jobs:
           fi
           echo "✅ Health check passed (HTTP 200)"
 
-          # Test 2: Authentication Handshake
+          # Probe 2: Authentication Handshake
           LOGIN_RESP=$(curl -s -X POST "$GREEN_URL/v1/auth/login" \
             -H "Content-Type: application/json" \
             -d '{"email":"demo@aegis.com","password":"password"}')
@@ -196,7 +339,7 @@ jobs:
           fi
           echo "✅ Authentication handshake passed (JWT Token issued)"
 
-          # Test 3: Authenticated Session Validation
+          # Probe 3: Authenticated Session Validation
           ME_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$GREEN_URL/v1/auth/me" \
             -H "Authorization: Bearer $TOKEN")
           if [ "$ME_STATUS" != "200" ]; then
@@ -209,10 +352,16 @@ jobs:
         if: steps.smoke_tests.outcome == 'success'
         run: |
           echo "✅ All automated health & auth probes passed. Shifting 100% traffic to Green..."
-          gcloud run services update-traffic aegis-actuator --region ${{ env.GCP_REGION }} --to-tags green=100
-          gcloud run services update-traffic aegis-agent-engine --region ${{ env.GCP_REGION }} --to-tags green=100
-          gcloud run services update-traffic aegis-api-gateway --region ${{ env.GCP_REGION }} --to-tags green=100
-          echo "🎉 Blue/Green deployment complete! New revision is live."
+          if [ "${{ needs.detect-changes.outputs.actuator }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            gcloud run services update-traffic aegis-actuator --region ${{ env.GCP_REGION }} --to-tags green=100
+          fi
+          if [ "${{ needs.detect-changes.outputs.engine }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            gcloud run services update-traffic aegis-agent-engine --region ${{ env.GCP_REGION }} --to-tags green=100
+          fi
+          if [ "${{ needs.detect-changes.outputs.gateway }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            gcloud run services update-traffic aegis-api-gateway --region ${{ env.GCP_REGION }} --to-tags green=100
+          fi
+          echo "🎉 Blue/Green deployment complete! New revisions are live."
 
       - name: Automated Rollback on Smoke Test Failure
         if: failure()
@@ -220,4 +369,6 @@ jobs:
           echo "🚨 CRITICAL: Smoke tests failed on Green revision!"
           echo "🔄 Existing Blue revision was untouched and remains 100% active. Zero downtime incurred."
           echo "Rolling back tagged revision..."
-          gcloud run services update-traffic aegis-api-gateway --region ${{ env.GCP_REGION }} --to-latest=false || true
+          if [ "${{ needs.detect-changes.outputs.gateway }}" == "true" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            gcloud run services update-traffic aegis-api-gateway --region ${{ env.GCP_REGION }} --to-latest=false || true
+          fi
