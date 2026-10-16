@@ -128,6 +128,39 @@ function getAuthHeaders(): Record<string, string> {
   return headers;
 }
 
+/**
+ * Resilient fetch wrapper with retry for Cloud Run scale-to-zero cold-start warmups (502/503/504).
+ */
+async function fetchWithRetry(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+  retries = 2,
+  backoffMs = 1200
+): Promise<Response> {
+  let attempt = 0;
+  while (true) {
+    try {
+      const res = await fetch(input, init);
+      if (
+        (res.status === 502 || res.status === 503 || res.status === 504) &&
+        attempt < retries
+      ) {
+        attempt++;
+        await new Promise((resolve) => setTimeout(resolve, backoffMs * attempt));
+        continue;
+      }
+      return res;
+    } catch (err) {
+      if (attempt < retries) {
+        attempt++;
+        await new Promise((resolve) => setTimeout(resolve, backoffMs * attempt));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     if (res.status === 401) {
@@ -160,7 +193,7 @@ export const api = {
       return null;
     }
     try {
-      const res = await fetch(`${BASE_URL}/v1/auth/me`, {
+      const res = await fetchWithRetry(`${BASE_URL}/v1/auth/me`, {
         headers: getAuthHeaders(),
       });
       if (!res.ok) {
@@ -185,7 +218,7 @@ export const api = {
     password: string,
     role = "L2 Senior Fraud Ops"
   ): Promise<LoginResponse> {
-    const res = await fetch(`${BASE_URL}/v1/auth/login`, {
+    const res = await fetchWithRetry(`${BASE_URL}/v1/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, role }),
@@ -200,7 +233,7 @@ export const api = {
    */
   async logout(): Promise<{ status: string }> {
     try {
-      const res = await fetch(`${BASE_URL}/v1/auth/logout`, {
+      const res = await fetchWithRetry(`${BASE_URL}/v1/auth/logout`, {
         method: "POST",
         headers: getAuthHeaders(),
       });
@@ -219,7 +252,7 @@ export const api = {
     tx: Transaction,
     mode: "sync" | "async" = "sync"
   ): Promise<Verdict> {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${BASE_URL}/v1/transactions:analyze?mode=${mode}`,
       {
         method: "POST",
@@ -241,7 +274,7 @@ export const api = {
     const url = txId
       ? `${BASE_URL}/v1/simulations/${scenario}?mode=${mode}&tx_id=${encodeURIComponent(txId)}`
       : `${BASE_URL}/v1/simulations/${scenario}?mode=${mode}`;
-    const res = await fetch(url, {
+    const res = await fetchWithRetry(url, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -252,7 +285,7 @@ export const api = {
    * Get synthesized verdict and case details for a transaction ID.
    */
   async getInvestigation(txId: string): Promise<Verdict> {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${BASE_URL}/v1/investigations/${encodeURIComponent(txId)}`,
       {
         headers: getAuthHeaders(),
@@ -265,7 +298,7 @@ export const api = {
    * List recent investigation verdicts for live SOC dashboard stream.
    */
   async listInvestigations(limit = 50): Promise<Verdict[]> {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${BASE_URL}/v1/investigations?limit=${limit}`,
       {
         headers: getAuthHeaders(),
@@ -283,7 +316,7 @@ export const api = {
     reason: string,
     analystUid = "analyst_l2_lead"
   ): Promise<Verdict> {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${BASE_URL}/v1/investigations/${encodeURIComponent(txId)}/decision`,
       {
         method: "POST",
@@ -303,7 +336,7 @@ export const api = {
    * Retrieve aggregated SOC operational metrics.
    */
   async getMetricsSummary(): Promise<MetricsSummary> {
-    const res = await fetch(`${BASE_URL}/v1/metrics/summary`, {
+    const res = await fetchWithRetry(`${BASE_URL}/v1/metrics/summary`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<MetricsSummary>(res);
@@ -317,7 +350,7 @@ export const api = {
     cleared_count: number;
     message: string;
   }> {
-    const res = await fetch(`${BASE_URL}/v1/investigations:clear`, {
+    const res = await fetchWithRetry(`${BASE_URL}/v1/investigations:clear`, {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -332,7 +365,7 @@ export const api = {
    * Fetch active deterministic banking fraud rules & guardrails.
    */
   async getPolicies(): Promise<PolicyGuardrails> {
-    const res = await fetch(`${BASE_URL}/v1/policies`, {
+    const res = await fetchWithRetry(`${BASE_URL}/v1/policies`, {
       headers: getAuthHeaders(),
     });
     return handleResponse<PolicyGuardrails>(res);

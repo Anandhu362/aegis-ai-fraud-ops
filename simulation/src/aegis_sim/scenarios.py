@@ -7,14 +7,17 @@ from aegis_common.schemas.enums import Channel, MerchantCategory
 from aegis_common.schemas.transaction import Location, Transaction
 
 
-def create_clean_coffee_scenario(tx_id: str = "TX_COFFEE001") -> Transaction:
+def create_clean_coffee_scenario(
+    tx_id: str = "TX_COFFEE001",
+    user_id: str = "USR_MARCUS712",
+) -> Transaction:
     """Scenario 1: Benign everyday coffee transaction ($4.50, home city, clean IP).
 
     Fast-path triage: Score = 0 -> ALLOW in < 1s (zero LLM inference).
     """
     return Transaction(
         tx_id=tx_id,
-        user_id="USR_MARCUS712",
+        user_id=user_id,
         timestamp=datetime.now(UTC),
         amount=Decimal("4.50"),
         currency="USD",

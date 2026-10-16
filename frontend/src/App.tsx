@@ -236,7 +236,9 @@ export function App(): React.JSX.Element {
   useEffect(() => {
     if (!streaming || !session) return;
 
-    const sequence: Array<"coffee" | "smurfing" | "tor_travel"> = [
+    let isMounted = true;
+    let timerId: ReturnType<typeof setTimeout> | null = null;
+    const sequence: Array<"coffee" | "coffee" | "coffee" | "smurfing" | "tor_travel"> = [
       "coffee",
       "coffee",
       "coffee",
@@ -245,12 +247,13 @@ export function App(): React.JSX.Element {
     ];
     let idx = 0;
 
-    const timer = setInterval(async () => {
+    const streamCycle = async () => {
+      if (!isMounted) return;
       const scenario = sequence[idx % sequence.length];
       idx++;
       try {
         const res = await api.triggerSimulation(scenario, "sync");
-        if (res && "tx_id" in res) {
+        if (isMounted && res && "tx_id" in res) {
           const v = res as Verdict;
           setSelectedTxId(v.tx_id);
           setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
@@ -275,10 +278,19 @@ export function App(): React.JSX.Element {
         }
       } catch (err) {
         console.warn("Live stream transaction transient delay:", err);
+      } finally {
+        if (isMounted) {
+          timerId = setTimeout(streamCycle, 4500);
+        }
       }
-    }, 3500);
+    };
 
-    return () => clearInterval(timer);
+    streamCycle();
+
+    return () => {
+      isMounted = false;
+      if (timerId) clearTimeout(timerId);
+    };
   }, [streaming, session, setSelectedTxId]);
 
   // Ensure an initial case is selected in feed view

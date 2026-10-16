@@ -40,10 +40,13 @@ try:
     )
 except ImportError:
     # Production fallback when aegis_sim workspace package is not installed
-    def create_clean_coffee_scenario(tx_id: str = "TX_COFFEE001") -> Transaction:
+    def create_clean_coffee_scenario(
+        tx_id: str = "TX_COFFEE001",
+        user_id: str = "USR_MARCUS712",
+    ) -> Transaction:
         return Transaction(
             tx_id=tx_id,
-            user_id="USR_MARCUS712",
+            user_id=user_id,
             timestamp=datetime.now(UTC),
             amount=Decimal("4.50"),
             currency="USD",
@@ -389,7 +392,19 @@ class GatewayService:
         match scenario_key:
             case "coffee" | "clean_coffee":
                 target_id = tx_id or f"TX_COFFEE{seq_suffix}"
-                tx = create_clean_coffee_scenario(tx_id=target_id)
+                routine_accounts = (
+                    "USR_MARCUS712",
+                    "USR_EMMA102",
+                    "USR_LIAM405",
+                    "USR_SOPHIA209",
+                    "USR_NOAH881",
+                )
+                account_id = (
+                    "USR_MARCUS712"
+                    if tx_id
+                    else routine_accounts[int(seq_suffix, 16) % len(routine_accounts)]
+                )
+                tx = create_clean_coffee_scenario(tx_id=target_id, user_id=account_id)
             case "smurfing" | "structuring":
                 target_id = tx_id or f"TX_SMURF{seq_suffix}"
                 tx = create_smurfing_scenario(tx_id=target_id)

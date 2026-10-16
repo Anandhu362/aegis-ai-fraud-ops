@@ -29,7 +29,7 @@ export function SimulationBar({
           </span>
           {streaming && (
             <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full animate-pulse">
-              LIVE STREAM ACTIVE (3.5s)
+              LIVE STREAM ACTIVE (4.5s)
             </span>
           )}
         </div>
