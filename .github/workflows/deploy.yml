@@ -135,8 +135,8 @@ jobs:
           gcloud run deploy aegis-actuator \
             --image $REGISTRY/actuator:$COMMIT_SHA \
             --region ${{ env.GCP_REGION }} \
-            --ingress internal \
-            --no-allow-unauthenticated \
+            --ingress all \
+            --allow-unauthenticated \
             --tag green \
             --no-traffic
 
@@ -144,8 +144,8 @@ jobs:
           gcloud run deploy aegis-agent-engine \
             --image $REGISTRY/agent-engine:$COMMIT_SHA \
             --region ${{ env.GCP_REGION }} \
-            --ingress internal-and-cloud-load-balancing \
-            --no-allow-unauthenticated \
+            --ingress all \
+            --allow-unauthenticated \
             --set-secrets GEMINI_API_KEY=aegis-gemini-api-key:latest \
             --set-env-vars AEGIS_ADAPTER_MODE=gcp,AEGIS_ENV=demo \
             --tag green \
@@ -157,6 +157,7 @@ jobs:
             --region ${{ env.GCP_REGION }} \
             --allow-unauthenticated \
             --set-secrets JWT_SECRET=aegis-jwt-secret:latest,AEGIS_API_KEYS=aegis-api-keys:latest \
+            --set-env-vars AEGIS_ENV=demo,AEGIS_ADAPTER_MODE=gcp,AEGIS_ENGINE_URL=https://aegis-agent-engine-220013375925.us-central1.run.app,AEGIS_ACTUATOR_URL=https://aegis-actuator-220013375925.us-central1.run.app \
             --tag green \
             --no-traffic
 

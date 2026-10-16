@@ -232,7 +232,7 @@ export function App(): React.JSX.Element {
           setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
         }
       } catch (err) {
-        console.error("Streaming transaction error", err);
+        console.warn("Live stream transaction transient delay:", err);
       }
     }, 3500);
 
