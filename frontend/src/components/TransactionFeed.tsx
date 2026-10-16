@@ -52,8 +52,8 @@ export function TransactionFeed({ cases, onSelectCase }: TransactionFeedProps): 
               <p className="text-xs font-semibold text-[var(--color-brand-midnight)]">
                 Live Feed Standby
               </p>
-              <p className="text-[11px] text-[var(--color-text-muted)] mt-1 max-w-[260px] mx-auto leading-relaxed">
-                Listening on preloaded gateway channels. Live stream will display incoming transactions as they clear.
+              <p className="text-[11px] text-[var(--color-text-muted)] mt-1 max-w-[280px] mx-auto leading-relaxed">
+                Listening on preloaded gateway channels. Click any surveillance rail above or &ldquo;Start Live Stream&rdquo; to simulate real-time banking transactions.
               </p>
             </div>
           </div>

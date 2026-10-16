@@ -70,6 +70,9 @@ export function App(): React.JSX.Element {
   });
   const [sseActive, setSseActive] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [streaming, setStreaming] = useState(false);
+  const [loadingScenario, setLoadingScenario] = useState<string | null>(null);
+  const [populating, setPopulating] = useState(false);
 
   // Authentication & RBAC Session State (strictly server-side JWT authenticated)
   const [session, setSession] = useState<AnalystProfile | null>(null);
@@ -128,6 +131,7 @@ export function App(): React.JSX.Element {
   };
 
   const resetLocalState = () => {
+    setStreaming(false);
     setCases([]);
     setSelectedTxId(null);
     setMetrics({
@@ -159,6 +163,81 @@ export function App(): React.JSX.Element {
       setClearing(false);
     }
   };
+
+  // Interactive Single-Scenario Ingestion Handler
+  const handleTriggerScenario = async (
+    scenario: "coffee" | "smurfing" | "tor_travel"
+  ) => {
+    try {
+      setLoadingScenario(scenario);
+      const res = await api.triggerSimulation(scenario, "sync");
+      if (res && "tx_id" in res) {
+        const v = res as Verdict;
+        setSelectedTxId(v.tx_id);
+        setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
+      }
+    } catch (err) {
+      console.error("Failed to trigger simulation scenario", err);
+    } finally {
+      setLoadingScenario(null);
+    }
+  };
+
+  // Populate 3 Representative Benchmark Cases
+  const handlePopulateDemoData = async () => {
+    try {
+      setPopulating(true);
+      await api.triggerSimulation("coffee", "sync");
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      await api.triggerSimulation("smurfing", "sync");
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      const ato = await api.triggerSimulation("tor_travel", "sync");
+      if (ato && "tx_id" in ato) {
+        const v = ato as Verdict;
+        setSelectedTxId(v.tx_id);
+        setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
+      }
+    } catch (err) {
+      console.error("Failed to populate demo cases", err);
+    } finally {
+      setPopulating(false);
+    }
+  };
+
+  const handleToggleStreaming = () => {
+    setStreaming((prev) => !prev);
+  };
+
+  // Continuous traffic generator when streaming toggle is active
+  useEffect(() => {
+    if (!streaming || !session) return;
+
+    const sequence: Array<"coffee" | "smurfing" | "tor_travel"> = [
+      "coffee",
+      "coffee",
+      "coffee",
+      "smurfing",
+      "tor_travel",
+    ];
+    let idx = 0;
+
+    const timer = setInterval(async () => {
+      const scenario = sequence[idx % sequence.length];
+      idx++;
+      try {
+        const res = await api.triggerSimulation(scenario, "sync");
+        if (res && "tx_id" in res) {
+          const v = res as Verdict;
+          setSelectedTxId(v.tx_id);
+          setCases((prev) => [v, ...prev.filter((c) => c.tx_id !== v.tx_id)]);
+        }
+      } catch (err) {
+        console.error("Streaming transaction error", err);
+      }
+    }, 3500);
+
+    return () => clearInterval(timer);
+  }, [streaming, session, setSelectedTxId]);
 
   // Ensure an initial case is selected in feed view
   useEffect(() => {
@@ -479,7 +558,14 @@ export function App(): React.JSX.Element {
                 </div>
 
                 {/* Preloaded Core Banking Channels & Pipeline Surveillance */}
-                <SimulationBar />
+                <SimulationBar
+                  onTriggerScenario={handleTriggerScenario}
+                  loadingScenario={loadingScenario}
+                  streaming={streaming}
+                  onToggleStreaming={handleToggleStreaming}
+                  onPopulateDemoData={handlePopulateDemoData}
+                  populating={populating}
+                />
               </section>
 
               {/* ── Two-Column Operational Surface (Feed & Investigation) ─── */}
