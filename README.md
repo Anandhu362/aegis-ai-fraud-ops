@@ -19,44 +19,28 @@
 
 ## 📸 System Screenshots & Operations Center
 
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [IMAGE PLACEHOLDER 1: FULL-SCREEN MIDNIGHT SOC LOGIN & RBAC INTERFACE]                 │
-│ Caption: Full-screen institutional login with server-side RFC 7519 HMAC-SHA256 JWT     │
-│ authentication, brute-force rate-limiting, and automated analyst identity resolution.  │
-│ Path: docs/screenshots/01_soc_login.png                                               │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
-*(Screenshot path: `docs/screenshots/01_soc_login.png`)*
+### 1. Institutional Midnight SOC Access & RBAC Controls
+![Full-Screen Midnight SOC Login & RBAC Interface](docs/screenshots/01_soc_login.png)
+*Full-screen institutional login with server-side RFC 7519 HMAC-SHA256 JWT authentication, brute-force rate-limiting, and automated analyst identity resolution.*
 
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [IMAGE PLACEHOLDER 2: MULTI-AGENT CASE INSPECTION TERMINAL & RISK GAUGE]               │
-│ Caption: Glass-box telemetry showing sequential investigation traces from Behavioral   │
-│ Analyst, Threat Intel, and Orchestrator with evidence IDs and hard-rule floors.        │
-│ Path: docs/screenshots/02_case_inspection.png                                         │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
-*(Screenshot path: `docs/screenshots/02_case_inspection.png`)*
+<br/>
 
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [IMAGE PLACEHOLDER 3: OPERATIONS BI ANALYTICS & COMPUTE ECONOMICS]                     │
-│ Caption: Live executive telemetry displaying 82.3% fast-path coverage, <1.0% FPR,      │
-│ 99.2% model accuracy, and real-time compute spend ($0.000075 / tx).                    │
-│ Path: docs/screenshots/03_operations_bi.png                                            │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
-*(Screenshot path: `docs/screenshots/03_operations_bi.png`)*
+### 2. Multi-Agent Case Inspection Terminal & Threat Gauge
+![Multi-Agent Case Inspection Terminal & Risk Gauge](docs/screenshots/02_case_inspection.png)
+*Glass-box telemetry showing sequential investigation traces from Behavioral Analyst, Threat Intel, and Orchestrator with evidence IDs and hard-rule floors.*
 
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [IMAGE PLACEHOLDER 4: PRELOADED BANKING CHANNELS & LIVE STREAM]                        │
-│ Caption: Surveillance of Retail POS, eCommerce 3DS, Fedwire/RTP, and Geo-Firewall.     │
-│ Path: docs/screenshots/04_live_stream.png                                             │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
-*(Screenshot path: `docs/screenshots/04_live_stream.png`)*
+<br/>
+
+### 3. Operations BI Analytics & Compute Economics
+![Operations BI Analytics & Compute Economics](docs/screenshots/03_operations_bi.png)
+*Live executive telemetry displaying 82.3% fast-path coverage, <1.0% FPR, 99.2% model accuracy, and real-time compute spend ($0.000075 / tx).*
+
+<br/>
+
+### 4. Preloaded Core Banking Channels & Live Transaction Stream
+![Preloaded Banking Channels & Live Stream](docs/screenshots/04_live_stream.png)
+*Surveillance of Retail POS, eCommerce 3DS, Fedwire/RTP, and Geo-Firewall channels with real-time streaming.*
+
 
 ---
 
