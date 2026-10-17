@@ -264,7 +264,7 @@ export const api = {
   },
 
   /**
-   * Trigger demonstration attack scenario ('coffee', 'smurfing', 'tor_travel').
+   * Trigger demonstration attack scenario ('coffee', 'challenge_3ds', 'smurfing', 'tor_travel').
    */
   async triggerSimulation(
     scenario: string,

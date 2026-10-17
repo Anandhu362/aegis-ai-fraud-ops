@@ -130,6 +130,12 @@ def test_simulation_scenarios_coffee_smurfing_tor(client: TestClient) -> None:
     assert resp_tor.status_code == 200
     assert resp_tor.json()["decision"] == Decision.LOCK_ACCOUNT
 
+    # 4. 3DS Step-Up Challenge
+    resp_3ds = client.post("/v1/simulations/challenge_3ds")
+    assert resp_3ds.status_code == 200
+    assert resp_3ds.json()["decision"] == Decision.CHALLENGE_3DS
+    assert resp_3ds.json()["actuator_action"]["challenge_initiated"] is True
+
 
 def test_simulation_unknown_scenario_returns_validation_error(client: TestClient) -> None:
     resp = client.post("/v1/simulations/unknown_attack")

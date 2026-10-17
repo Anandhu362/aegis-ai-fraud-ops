@@ -34,6 +34,7 @@ from aegis_common.schemas.verdict import (
 
 try:
     from aegis_sim.scenarios import (  # type: ignore[import-untyped]
+        create_3ds_challenge_scenario,
         create_clean_coffee_scenario,
         create_smurfing_scenario,
         create_tor_travel_scenario,
@@ -100,6 +101,29 @@ except ImportError:
                 longitude=8.6821,
                 city="Frankfurt",
                 country="DE",
+            ),
+        )
+
+    def create_3ds_challenge_scenario(
+        tx_id: str = "TX_3DS001",
+        user_id: str = "USR_MARCUS712",
+    ) -> Transaction:
+        return Transaction(
+            tx_id=tx_id,
+            user_id=user_id,
+            timestamp=datetime.now(UTC),
+            amount=Decimal("450.00"),
+            currency="USD",
+            merchant="Best Buy Electronics #812",
+            merchant_category=MerchantCategory.ELECTRONICS,
+            channel=Channel.ECOMMERCE,
+            device_id="DEV_NEW_IPAD_2026",
+            ip_address=IPv4Address("73.189.42.88"),
+            location=Location(
+                latitude=37.7749,
+                longitude=-122.4194,
+                city="San Francisco",
+                country="US",
             ),
         )
 
@@ -405,6 +429,9 @@ class GatewayService:
                     else routine_accounts[int(seq_suffix, 16) % len(routine_accounts)]
                 )
                 tx = create_clean_coffee_scenario(tx_id=target_id, user_id=account_id)
+            case "challenge_3ds" | "3ds" | "challenge" | "step_up":
+                target_id = tx_id or f"TX_3DS{seq_suffix}"
+                tx = create_3ds_challenge_scenario(tx_id=target_id)
             case "smurfing" | "structuring":
                 target_id = tx_id or f"TX_SMURF{seq_suffix}"
                 tx = create_smurfing_scenario(tx_id=target_id)
@@ -414,7 +441,7 @@ class GatewayService:
             case _:
                 raise ValidationError(
                     f"Unknown simulation scenario: {scenario}",
-                    detail="Supported scenarios are 'coffee', 'smurfing', 'tor_travel'",
+                    detail="Supported scenarios are 'coffee', 'challenge_3ds', 'smurfing', 'tor_travel'",
                 )
 
         if mode == "sync":

@@ -84,3 +84,33 @@ def create_tor_travel_scenario(tx_id: str = "TX_ATO001") -> Transaction:
             country="DE",
         ),
     )
+
+
+def create_3ds_challenge_scenario(
+    tx_id: str = "TX_3DS001",
+    user_id: str = "USR_MARCUS712",
+) -> Transaction:
+    """Scenario 4: E-commerce step-up authentication challenge ($450 electronics, new device).
+
+    Moderate monetary anomaly in novel category from unrecognized device.
+    Fires S1_monetary (+25), S2_novel_category (+8), S10_new_device (+10).
+    Base score = 43 -> Elevated Risk Band (31-70) -> Decision: CHALLENGE_3DS (SMS OTP).
+    """
+    return Transaction(
+        tx_id=tx_id,
+        user_id=user_id,
+        timestamp=datetime.now(UTC),
+        amount=Decimal("450.00"),
+        currency="USD",
+        merchant="Best Buy Electronics #812",
+        merchant_category=MerchantCategory.ELECTRONICS,
+        channel=Channel.ECOMMERCE,
+        device_id="DEV_NEW_IPAD_2026",
+        ip_address="73.189.42.88",  # type: ignore[arg-type]
+        location=Location(
+            latitude=37.7749,
+            longitude=-122.4194,
+            city="San Francisco",
+            country="US",
+        ),
+    )

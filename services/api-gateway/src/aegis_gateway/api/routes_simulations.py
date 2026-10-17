@@ -24,6 +24,7 @@ async def trigger_simulation(
     tx_id: str | None = Query(default=None, description="Optional custom transaction ID"),
 ) -> Verdict | dict[str, str]:
     """Trigger predefined fraud attack scenarios: 'coffee' (fast-path),
-    'smurfing' (structuring), or 'tor_travel' (impossible travel ATO).
+    'challenge_3ds' (step-up authentication), 'smurfing' (structuring),
+    or 'tor_travel' (impossible travel ATO).
     """
     return await service.trigger_simulation_scenario(scenario=scenario, mode=mode, tx_id=tx_id)

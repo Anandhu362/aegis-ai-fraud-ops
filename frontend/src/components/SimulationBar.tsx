@@ -1,8 +1,8 @@
 import React from "react";
-import { CreditCard, Landmark, Globe, Play, Pause, Zap, ArrowRight, Loader2 } from "lucide-react";
+import { CreditCard, Landmark, Globe, ShieldAlert, Play, Pause, Zap, ArrowRight, Loader2 } from "lucide-react";
 
 export interface SimulationBarProps {
-  onTriggerScenario: (scenario: "coffee" | "smurfing" | "tor_travel") => Promise<void>;
+  onTriggerScenario: (scenario: "coffee" | "challenge_3ds" | "smurfing" | "tor_travel") => Promise<void>;
   loadingScenario: string | null;
   streaming: boolean;
   onToggleStreaming: () => void;
@@ -64,7 +64,7 @@ export function SimulationBar({
             onClick={onPopulateDemoData}
             disabled={populating || streaming}
             className="px-3.5 py-1.5 rounded-xl font-mono text-xs font-semibold flex items-center gap-2 bg-white hover:bg-slate-50 text-[var(--color-brand-midnight)] border border-[var(--color-border)] hover:border-slate-300 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
-            title="Inject 3 verified benchmark cases: Clean POS, Structuring Smurfing, and Tor ATO Lockout"
+            title="Inject 4 verified benchmark cases: Clean POS, 3DS Step-Up, Structuring Smurfing, and Tor ATO Lockout"
           >
             {populating ? (
               <>
@@ -81,8 +81,8 @@ export function SimulationBar({
         </div>
       </div>
 
-      {/* 3 Interactive Banking Scenario Rails */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* 4 Interactive Banking Scenario Rails */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Channel 1: Retail POS & Card Clearing (Fast-Path) */}
         <div
           onClick={() => !loadingScenario && onTriggerScenario("coffee")}
@@ -134,7 +134,58 @@ export function SimulationBar({
           </div>
         </div>
 
-        {/* Channel 2: Fedwire & RTP Velocity Surveillance (Rule H2) */}
+        {/* Channel 2: eCommerce Card-Not-Present (Step-Up 3DS Challenge) */}
+        <div
+          onClick={() => !loadingScenario && onTriggerScenario("challenge_3ds")}
+          className={`group p-4 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-white border transition-all cursor-pointer shadow-2xs flex flex-col justify-between ${
+            loadingScenario === "challenge_3ds"
+              ? "border-cyan-500 ring-2 ring-cyan-500/20 bg-white"
+              : "border-[var(--color-border)] hover:border-cyan-300"
+          }`}
+        >
+          <div>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100 shrink-0 group-hover:scale-105 transition-transform">
+                  <ShieldAlert className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-[var(--color-brand-midnight)]">
+                    eCommerce &amp; Card-Not-Present
+                  </div>
+                  <div className="text-[10px] font-mono text-cyan-700 font-semibold">
+                    Step-Up 3DS • $450 Electronics
+                  </div>
+                </div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200 shrink-0">
+                RULE S1+S10
+              </span>
+            </div>
+
+            <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+              Novel merchant category on new device. Elevates risk score (31–70) and triggers SMS OTP challenge.
+            </p>
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-[11px] font-mono text-slate-500">
+              {loadingScenario === "challenge_3ds" ? "Initiating 3DS OTP..." : "Inject 3DS ($450)"}
+            </span>
+            <div className="flex items-center gap-1 text-cyan-600 font-semibold text-[11px]">
+              {loadingScenario === "challenge_3ds" ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <>
+                  <span className="group-hover:underline">Trigger</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Channel 3: Fedwire & RTP Velocity Surveillance (Rule H2) */}
         <div
           onClick={() => !loadingScenario && onTriggerScenario("smurfing")}
           className={`group p-4 rounded-2xl bg-[var(--color-surface-subtle)] hover:bg-white border transition-all cursor-pointer shadow-2xs flex flex-col justify-between ${

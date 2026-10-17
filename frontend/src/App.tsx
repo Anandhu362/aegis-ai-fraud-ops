@@ -8,6 +8,7 @@ import {
   LogOut,
   Activity,
   CheckCircle2,
+  ShieldAlert,
 } from "lucide-react";
 import { useUiStore } from "./store/uiStore";
 import { SimulationBar } from "./components/SimulationBar";
@@ -166,7 +167,7 @@ export function App(): React.JSX.Element {
 
   // Interactive Single-Scenario Ingestion Handler
   const handleTriggerScenario = async (
-    scenario: "coffee" | "smurfing" | "tor_travel"
+    scenario: "coffee" | "challenge_3ds" | "smurfing" | "tor_travel"
   ) => {
     try {
       setLoadingScenario(scenario);
@@ -181,7 +182,8 @@ export function App(): React.JSX.Element {
           const isLock =
             v.decision === "LOCK_ACCOUNT" ||
             v.decision === "DECLINE_LOCKED";
-          const isReview = v.decision === "REVIEW";
+          const isReview =
+            v.decision === "REVIEW" || v.decision === "CHALLENGE_3DS";
           return {
             ...prev,
             processed_count: prev.processed_count + 1,
@@ -201,11 +203,13 @@ export function App(): React.JSX.Element {
     }
   };
 
-  // Populate 3 Representative Benchmark Cases
+  // Populate 4 Representative Benchmark Cases (POS Clean, 3DS Step-Up, Structuring Smurfing, Tor ATO)
   const handlePopulateDemoData = async () => {
     try {
       setPopulating(true);
       await api.triggerSimulation("coffee", "sync", "TX_COFFEE001");
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      await api.triggerSimulation("challenge_3ds", "sync", "TX_3DS001");
       await new Promise((resolve) => setTimeout(resolve, 350));
       await api.triggerSimulation("smurfing", "sync", "TX_SMURF001");
       await new Promise((resolve) => setTimeout(resolve, 350));
@@ -238,9 +242,12 @@ export function App(): React.JSX.Element {
 
     let isMounted = true;
     let timerId: ReturnType<typeof setTimeout> | null = null;
-    const sequence: Array<"coffee" | "coffee" | "coffee" | "smurfing" | "tor_travel"> = [
+    const sequence: Array<
+      "coffee" | "coffee" | "challenge_3ds" | "coffee" | "smurfing" | "tor_travel"
+    > = [
       "coffee",
       "coffee",
+      "challenge_3ds",
       "coffee",
       "smurfing",
       "tor_travel",
@@ -672,10 +679,42 @@ export function App(): React.JSX.Element {
 
                           <div className="p-5 rounded-2xl bg-[var(--color-surface-subtle)] border border-[var(--color-border)] flex flex-col justify-between">
                             <div className="flex items-center justify-between mb-3">
-                              <div className="w-10 h-10 rounded-xl bg-white text-violet-600 flex items-center justify-center shadow-xs border border-violet-100">
-                                <Lock className="w-5 h-5 text-rose-600" />
+                              <div
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-xs border ${
+                                  currentCase.decision === "ALLOW"
+                                    ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                                    : currentCase.decision === "CHALLENGE_3DS"
+                                    ? "bg-cyan-50 text-cyan-600 border-cyan-100"
+                                    : currentCase.decision === "BLOCK_TX"
+                                    ? "bg-orange-50 text-orange-600 border-orange-100"
+                                    : "bg-rose-50 text-rose-600 border-rose-100"
+                                }`}
+                              >
+                                {currentCase.decision === "ALLOW" ? (
+                                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                                ) : currentCase.decision === "CHALLENGE_3DS" ? (
+                                  <ShieldAlert className="w-5 h-5 text-cyan-600" />
+                                ) : (
+                                  <Lock
+                                    className={`w-5 h-5 ${
+                                      currentCase.decision === "BLOCK_TX"
+                                        ? "text-orange-600"
+                                        : "text-rose-600"
+                                    }`}
+                                  />
+                                )}
                               </div>
-                              <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full border bg-white text-[var(--color-brand-midnight)] border-[var(--color-border)]">
+                              <span
+                                className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${
+                                  currentCase.decision === "ALLOW"
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : currentCase.decision === "CHALLENGE_3DS"
+                                    ? "bg-cyan-50 text-cyan-800 border-cyan-300"
+                                    : currentCase.decision === "BLOCK_TX"
+                                    ? "bg-orange-50 text-orange-800 border-orange-200"
+                                    : "bg-rose-50 text-rose-800 border-rose-200"
+                                }`}
+                              >
                                 {currentCase.decision}
                               </span>
                             </div>
