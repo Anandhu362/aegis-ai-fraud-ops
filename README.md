@@ -52,7 +52,7 @@
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │ [IMAGE PLACEHOLDER 4: PRELOADED BANKING CHANNELS & LIVE STREAM]                        │
-│ Caption: Surveillance of Retail POS, Fedwire/RTP velocity, and Geo-Firewall channels.  │
+│ Caption: Surveillance of Retail POS, eCommerce 3DS, Fedwire/RTP, and Geo-Firewall.     │
 │ Path: docs/screenshots/04_live_stream.png                                             │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -509,41 +509,42 @@ Reviewers and judges can evaluate the system immediately with zero setup via the
 
 ### 9.3 In-Dashboard Interactive Simulation Bar
 
-The Midnight SOC dashboard features an embedded **Simulation Control Ribbon** at the top of the interface, allowing judges to evaluate multi-agent reasoning, fast-path triage, and autonomous containment directly in the browser without touching a terminal:
+The Midnight SOC dashboard features an embedded **Simulation Control Ribbon** at the top of the interface, allowing judges to evaluate multi-agent reasoning, fast-path triage, step-up challenges, and autonomous containment directly in the browser without touching a terminal:
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  🟢 PRELOADED CORE BANKING CHANNELS & SURVEILLANCE RAILS              [ ▶ Start Live Stream ]  [ ⚡ Populate Demo Cases ] │
-├─────────────────────────────────────────┬──────────────────────────────────────────┬───────────────────────────────────┤
-│  💳 Channel 1: Retail POS & Card Clear  │  🏛️ Channel 2: Fedwire & RTP Velocity    │  🌐 Channel 3: Cross-Border Geo   │
-│  • $4.50 Coffee Shop Spend              │  • $9,800 Structuring BSA Burst          │  • $12,500 Impossible Travel ATO  │
-│  • Tag: [ FAST-PATH ]                   │  • Tag: [ RULE H2 ]                      │  • Tag: [ RULE H1 ]               │
-│  • Latency: < 500ms ($0 LLM Compute)    │  • Action: BLOCK_TX (Score 72+)          │  • Action: LOCK_ACCOUNT (Score 90+)│
-└─────────────────────────────────────────┴──────────────────────────────────────────┴───────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  🟢 PRELOADED CORE BANKING CHANNELS & SURVEILLANCE RAILS                                    [ ▶ Start Live Stream ]  [ ⚡ Populate Demo Cases ]        │
+├─────────────────────────────────┬─────────────────────────────────┬──────────────────────────────────┬────────────────────────────────────────────────┤
+│  💳 Channel 1: Retail POS       │  🛡️ Channel 2: eCommerce 3DS    │  🏛️ Channel 3: Fedwire & RTP     │  🌐 Channel 4: Cross-Border Geo                │
+│  • $4.50 Coffee Shop Spend      │  • $450 Electronics (New Dev)   │  • $9,800 Structuring BSA Burst  │  • $12,500 Impossible Travel ATO               │
+│  • Tag: [ FAST-PATH ]           │  • Tag: [ RULE S1+S10 ]         │  • Tag: [ RULE H2 ]              │  • Tag: [ RULE H1 ]                            │
+│  • Latency: < 50ms ($0 LLM)     │  • Action: CHALLENGE_3DS (43)   │  • Action: BLOCK_TX (Score 72+)  │  • Action: LOCK_ACCOUNT (Score 90+)            │
+└─────────────────────────────────┴─────────────────────────────────┴──────────────────────────────────┴────────────────────────────────────────────────┘
 ```
 
 #### 🎛️ Live Demonstration Controls
 
 1. **`▶ Start Live Stream` / `⏸ Pause Live Stream` (4.5s Interval):**
-   - Initiates an automated, continuous feed of realistic incoming retail and high-risk banking transactions directly from the browser.
+   - Initiates an automated, continuous feed of realistic incoming retail, eCommerce, and high-risk banking transactions directly from the browser.
    - **Scale-to-Zero Cold Start Pacing:** Uses non-overlapping sequential async cycling (4.5s post-completion delay) to guarantee zero request pileup while Cloud Run containers scale.
    - **Customer Account Rotation:** Dynamically rotates routine retail transactions across diverse customer profiles (`USR_MARCUS712`, `USR_EMMA102`, `USR_LIAM405`, `USR_SOPHIA209`, `USR_NOAH881`), demonstrating mixed traffic where clean purchases clear the sub-second fast path and malicious bursts trigger AI investigation.
    - **Live Telemetry Stream:** Populates live glass-box agent chat logs, threat dials, risk scores, and BigQuery/Firestore records in real time.
 
 2. **`⚡ Populate Demo Cases`:**
-   - Instantly injects the 3 verified foundational benchmark cases into the feed for immediate case inspection:
-     1. Benign everyday POS coffee purchase.
-     2. BSA structuring velocity burst.
-     3. Tor exit node impossible travel ATO.
+   - Instantly injects the 4 verified foundational benchmark cases into the feed for immediate case inspection:
+     1. Benign everyday POS coffee purchase (`ALLOW` • Fast-path).
+     2. eCommerce novel category and new device purchase (`CHALLENGE_3DS` • Step-up OTP, filling the Escalations Workbench).
+     3. BSA structuring velocity burst (`BLOCK_TX` • Rule $H_2$).
+     4. Tor exit node impossible travel ATO (`LOCK_ACCOUNT` • Rule $H_1$).
 
 3. **`🧹 Clear Feed & Reset`:**
    - Flushes cached investigations from the hot-cache and resets real-time operational counters to clean zero.
 
 ---
 
-### 9.4 The Three Foundational Benchmark Scenarios
+### 9.4 The Four Foundational Benchmark Scenarios
 
-Judges can click any of the 3 banking channel cards on the dashboard or trigger them via REST API:
+Judges can click any of the 4 banking channel cards on the dashboard or trigger them via REST API:
 
 #### ☕ Scenario 1: Routine Retail POS Purchase (Fast-Path Triage)
 - **Banking Channel:** Retail POS & Card Clearing (`FAST-PATH`)
@@ -555,7 +556,20 @@ Judges can click any of the 3 banking channel cards on the dashboard or trigger 
   curl -X POST https://aegis-fraud-ops-2026.web.app/v1/simulations/coffee
   ```
 
-#### 💸 Scenario 2: Fedwire BSA Structuring & Velocity Burst (Rule $H_2$)
+#### 🛡️ Scenario 2: eCommerce Card-Not-Present Step-Up Challenge (Score Band 31–70)
+- **Banking Channel:** eCommerce & Card-Not-Present (`RULE S1+S10`)
+- **Transaction:** `$450.00` at *Best Buy Electronics #812* from a newly registered iPad (`DEV_NEW_IPAD_2026`).
+- **Signals:** Monetary anomaly ($Z = 29.7$), novel merchant category (`electronics` not in grocery/coffee baseline), unrecognized device fingerprint.
+- **System Adjudication:** 
+  1. Base score calculated at **43** (Elevated Risk Band: 31–70).
+  2. Google ADK specialists assess moderate risk without triggering hard floors ($H_1, H_2$).
+  3. `PolicyAgent` issues **`CHALLENGE_3DS`**, autonomously dispatching an SMS One-Time Passcode (OTP) and escalating the transaction to the **Manual Review & Human-in-the-Loop Workbench** (`Escalations & Case Queue`) for analyst inspection.
+- **API Trigger:**
+  ```bash
+  curl -X POST https://aegis-fraud-ops-2026.web.app/v1/simulations/challenge_3ds
+  ```
+
+#### 💸 Scenario 3: Fedwire BSA Structuring & Velocity Burst (Rule $H_2$)
 - **Banking Channel:** Fedwire & RTP Velocity Surveillance (`RULE H2`)
 - **Transaction:** `$9,800.00` rapid transfer just under the $10,000 CTR/BSA reporting threshold.
 - **Signals:** Structuring pattern detected, high velocity count ($N \ge 5$ within 60s), elevated monetary deviation.
@@ -568,7 +582,7 @@ Judges can click any of the 3 banking channel cards on the dashboard or trigger 
   curl -X POST https://aegis-fraud-ops-2026.web.app/v1/simulations/smurfing
   ```
 
-#### 🚨 Scenario 3: Tor Exit Impossible Travel Account Takeover (Rule $H_1$)
+#### 🚨 Scenario 4: Tor Exit Impossible Travel Account Takeover (Rule $H_1$)
 - **Banking Channel:** Cross-Border & Geo-Firewall (`RULE H1`)
 - **Transaction:** `$13,061.79` at *Apex Global Crypto* from London.
 - **Signals:** Swiped 12 minutes after a Dubai ATM withdrawal ($v = 12,850\text{ km/h}$ over Tor Exit Node).
